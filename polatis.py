@@ -16,7 +16,18 @@ def timeStamped(fname, fmt="%Y-%m-%d_{fname}"):
 
 class Polatis:
 
+    """ Polatis class to interact with Polatis switch using telnet
+    
+    :param host: The IP address of the Polatis switch, defaults to 10.10.10.28"
+    :type host: str
+    :param port: The port number of the Polatis switch, defaults to 3082
+    :type port: str
+    :return: None
+    :rtype: None
+    """
+
     def __init__(self, host="10.10.10.28", port="3082"):
+        """Constructor method"""
         self.telnet = telnetlib.Telnet(host, port)
         self.eol = ";"
         self.patch = {}
@@ -32,6 +43,11 @@ class Polatis:
         pass
 
     def login(self):
+        """Login to the Polatis switch
+
+        :return: None
+        :rtype: None
+        """
         return self.__sendcmd("ACT-USER::root:123::root;")
 
     def logout(self):
@@ -64,13 +80,12 @@ class Polatis:
 
     def get_inport(self, inx):
         """
-        Retrieves the 'In' value from the 'ports' table in the 'provdb' database.
+        Retrieves the mapped Polatis input port number for a given component.
 
-        Args:
-            inx (str): The name of the port.
-
-        Returns:
-            str: The 'In' value associated with the specified port name.
+        :param inx: The name of the component.
+        :type inx: str
+        :return: The mapped Polatis port number.
+        :rtype: int
         """
         # Connect to the MySQL database
         conn = mysql.connector.connect(
@@ -83,17 +98,12 @@ class Polatis:
 
     def get_outport(self, outx):
         """
-        Retrieves the output port for a given input port.
+        Retrieves the mapped Polatis output port number for a given component.
 
-        Args:
-            outx (str): The name of the input port.
-
-        Returns:
-            str: The name of the corresponding output port.
-
-        Raises:
-            mysql.connector.Error: If there is an error executing the SQL query.
-            IndexError: If no output port is found for the given input port.
+        :param outx: The name of the component.
+        :type outx: str
+        :return: The mapped Polatis port number.
+        :rtype: int
         """
         # Connect to the MySQL database
         conn = mysql.connector.connect(
@@ -140,20 +150,22 @@ class Polatis:
             )
 
     def apply_patch_list(self, patch_list):
+
+        """ Apply a list of patches to the Polatis switch. The patch list is a list of tuples, where each tuple contains two elements: the input component and the output component.
+
+        :param patch_list: A list of patches, where each patch is a list of ports.
+        :type patch_list: list
+
+        :raises Exception: If patch_list is not a list or if it is empty.
+        :raises Exception: If the port max power is exceeded.
+        :raises Exception: If the ports are not available, or are allocated to other users.
+
+        :return: None
+        :rtype: None
+
         """
-        Applies a list of patches to the Polatis switch.
 
-        Args:
-            patch_list (list): A list of tuples representing the patches to be applied. Each tuple should contain two strings,
-                               where the first string represents the input component and the second string represents the output component.
 
-        Raises:
-            Exception: If the patch_list argument is not a list or if it is empty.
-            Exception: If some (or all) ports are not available in the patch_list.
-
-        Returns:
-            None
-        """
         if not isinstance(patch_list, list):
             raise Exception("Argument patch_list must be a list of tuples of patches")
         if len(patch_list) == 0:
@@ -232,15 +244,16 @@ class Polatis:
         conn.close()
 
     def check_patch_owners(self, patch_list):
-        """
-        Checks the owners of the ports in the given patch list.
 
-        Args:
-            patch_list (list): A list of patches, where each patch is a list of ports.
+        """Check if the ports in the patch list are available and are allocated to the running user.
 
-        Returns:
-            bool: True if all ports have the correct owner, False otherwise.
+        :param patch_list: A list of patches, where each patch is a list of ports.
+        :type patch_list: list
+
+        :return: True if all ports are available and allocated to the running user, False otherwise.
+        :rtype: bool
         """
+
 
         # Get the Unix user behind sudo
         unix_user = os.getenv("SUDO_USER")
@@ -303,6 +316,17 @@ class Polatis:
             return True
 
     def release_ports(self, patch_list, username):
+        """ ADMIN ONLY: Allocate the ports in the patch list to user/NULL.
+
+        :param patch_list: A list of patches, where each patch is a list of ports.
+        :type patch_list: list
+        :param username: The username to allocate the ports to.
+        :type username: str
+
+        :return: None
+        :rtype: None
+        
+        """
 
         with open("/etc/secure_keys/mysql_key.key", "r") as file:
             lines = file.readlines()
@@ -333,22 +357,20 @@ class Polatis:
         conn.close()
 
     def print_patch_table(self, patch_list):
+
+        """Prints the patch table based on the given patch list.
+
+        :raises Exception: If patch_list is not a list or if it is empty.
+        :raises Exception: If the port max power is exceeded.
+        :raises Exception: If the ports are not available, or are allocated to other users.
+
+        :param patch_list: A list of patches, where each patch is a list of ports.
+        :type patch_list: list
+
+        :return: None
+        :rtype: None
         """
-        Prints a patch table based on the given patch list.
 
-        Args:
-            patch_list (list): A list of tuples representing the patches.
-                Each tuple should contain two elements: the input patch and the output patch.
-            csv (bool, optional): If True, returns the patch table as a CSV string.
-                Defaults to False.
-
-        Returns:
-            None or str: If csv is True, returns the patch table as a CSV string.
-                Otherwise, prints the patch table and returns None.
-
-        Raises:
-            Exception: If patch_list is not a list or if it is empty.
-        """
         if not isinstance(patch_list, list):
             raise Exception("Argument patch_list must be a list of tuples of patches")
         if len(patch_list) == 0:
@@ -373,14 +395,17 @@ class Polatis:
 
     def get_patch_table_csv(self, patch_list, filename):
         """
-        Generates a CSV file containing the patch table based on the given patch list.
+        Writes the patch table to a CSV file.
 
-        Args:
-            patch_list (list): A list of patches.
-            filename (str): The name of the CSV file to be generated.
+        :param patch_list: A list of patches, where each patch is a list of ports.
+        :type patch_list: list
+        :param filename: The location of the CSV file.
+        :type filename: str
 
-        Returns:
-            None
+        :raises Exception: If patch_list is not a list or if it is empty.
+
+        :return: None
+        :rtype: None
         """
         if not isinstance(patch_list, list):
             raise Exception("Argument patch_list must be a list of tuples of patches")
@@ -490,6 +515,13 @@ class Polatis:
                     self.power[port] = float(power)
 
     def get_power(self, port):
+        """ Get the power of a port. The ports must be the absolute port number, not the component name. 
+
+        :param port: The port number.
+        :type port: int
+        :return: The power of the port.
+        :rtype: float
+        """
         line = "RTRV-PORT-POWER::%d:123:;" % port
         lines = self.__sendcmd(line)
         for line in lines.split("\n"):

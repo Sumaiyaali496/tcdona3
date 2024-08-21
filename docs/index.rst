@@ -16,6 +16,6 @@ Contents
 
    Home <self>
    Getting Started
-   Polatis
+   polatis
    Lumentum
    Monitor
