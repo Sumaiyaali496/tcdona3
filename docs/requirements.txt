@@ -1,2 +1,4 @@
 sphinx-rtd-theme
 bluepy
+pandas
+mysql-connector-python
