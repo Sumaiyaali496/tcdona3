@@ -24,16 +24,28 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
+import os
+import sys
 
-# Ensure the path is correct for the Read the Docs environment
+# Add your project root directory to the Python path
+sys.path.insert(0, os.path.abspath('.'))
+
+# Check if we're on Read the Docs' build environment
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 
+# Use the correct output path on Read the Docs
 if on_rtd:
-    # Set the output directory for HTML files
-    html_output_path = os.path.join(os.environ.get('READTHEDOCS_OUTPUT', ''), 'html')
-    if not os.path.exists(html_output_path):
-        os.makedirs(html_output_path)
-    html_static_path = [html_output_path]
+    html_output_path = os.environ.get('READTHEDOCS_OUTPUT', '')
+    if html_output_path:
+        html_output_dir = os.path.join(html_output_path, 'html')
+        # Make sure the directory exists
+        os.makedirs(html_output_dir, exist_ok=True)
+        html_static_path = [html_output_dir]
+    else:
+        html_static_path = ['_static']
+else:
+    html_static_path = ['_static']
 
+# Ensure the path is correct for the Read the Docs en
 html_theme = 'alabaster'
-html_static_path = ['_static']
+#html_static_path = ['_static']
