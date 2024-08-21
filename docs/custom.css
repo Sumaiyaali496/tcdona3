@@ -1,0 +1,7 @@
+/* custom.css */
+
+/* Override visited link color */
+a:visited {
+    color: inherit;  /* Inherit the color of non-visited links */
+    text-decoration: none;  /* Optional: to match other links */
+}
