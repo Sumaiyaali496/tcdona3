@@ -1,7 +1,9 @@
-polatis module
+Polatis
 ==============
 
-.. automodule:: polatis
+The ``Polatis`` Class
+*****************************
+.. autoclass:: polatis.Polatis
    :members:
    :undoc-members:
    :show-inheritance:
