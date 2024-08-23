@@ -243,6 +243,82 @@ class Polatis:
         cursor.close()
         conn.close()
 
+    def disconnet_eqipment(self, equipment_1, equipment_2):
+
+        """ Disconnect patching between two eqipments from the Polatis switch.
+
+        :param equipment_1: The name of the first equipment.
+        :type equipment_1: str
+        :param equipment_2: The name of the second equipment.
+        :type equipment_2: str
+
+        return: None
+        :rtype: None
+
+        raises Exception: If the port names are incorrect, or are allocated to other users.
+        """
+
+        self.disconnect_patch_list([(equipment_1, equipment_2)])
+
+        
+
+    def disconnect_patch_list(self, patch_list):
+
+
+        """ Disconnect a list of patches from the Polatis switch. The patch list is a list of tuples, where each tuple contains two elements: the input component and the output component.
+
+        :param patch_list: A list of patches, where each patch is a list of ports.
+        :type patch_list: list
+
+        :raises Exception: If patch_list is not a list or if it is empty.
+        :raises Exception: If the port names are incorrect, or are allocated to other users.
+
+        :return: None
+        :rtype: None
+
+        """
+
+        if not isinstance(patch_list, list):
+            raise Exception("Argument patch_list must be a list of tuples of patches")
+        if len(patch_list) == 0:
+            raise Exception("Argument patch_list must not be empty")
+
+        if not self.check_patch_owners(patch_list):
+            print("apply_patch_list failed")
+            raise Exception(
+                "apply_patch_list failed, some (or all) ports are not available. Please contact admin."
+            )
+        
+        # Connect to the MySQL database
+        conn = mysql.connector.connect(
+            host="127.0.0.1", user="testbed", password="mypassword", database="provdb"
+        )
+        cursor = conn.cursor()
+
+        for patch in patch_list:
+
+            input_comp, output_comp = patch
+
+            # Fetch the 'In' and 'Out' values from the Ports table
+            cursor.execute(
+                "SELECT `Out_Port` FROM ports_new WHERE Name = %s", (input_comp,)
+            )
+            inp = cursor.fetchone()[0]
+
+            cursor.execute(
+                "SELECT `In_Port` FROM ports_new WHERE Name = %s", (output_comp,)
+            )
+            outp = cursor.fetchone()[0]
+
+
+
+            self.__disconn(inp, outp)
+            time.sleep(1)
+        # Close the cursor and connection
+        cursor.close()
+        conn.close()
+
+
     def check_patch_owners(self, patch_list):
 
         """Check if the ports in the patch list are available and are allocated to the running user.
