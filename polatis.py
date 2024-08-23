@@ -243,7 +243,7 @@ class Polatis:
         cursor.close()
         conn.close()
 
-    def disconnet_eqipment(self, equipment_1, equipment_2):
+    def disconnect_equipment(self, equipment_1, equipment_2):
 
         """ Disconnect patching between two eqipments from the Polatis switch.
 
@@ -260,7 +260,7 @@ class Polatis:
 
         self.disconnect_patch_list([(equipment_1, equipment_2)])
 
-        
+
 
     def disconnect_patch_list(self, patch_list):
 
