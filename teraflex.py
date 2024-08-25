@@ -10,21 +10,9 @@ from utils import check_patch_owners
 class TFlex:
 
     """ Class to interact with the Teraflex device using NETCONF protocol
+
     :param ip_address: IP address of the Teraflex device, default is '10.10.10.92'
-
-    You would not be able to initialize this class unless you have been allocated as the patch owners for the Teraflex device., or the device is not being used. 
-
-    Usually, you should only use the following methods:
-    - read_pm_data
-    - change_configuration
-    - return_current_config
-
-    You can also use all the read-only methods such as get_operational_state, get_interface, get_params, get_symbolrate, get_filterrolloff, get_fec_algorithm, get_power_and_frequency, get_interface_modulation, get_port_admin_state.
-
-    For the other methods, currently we have 4 line ports available: [1/1/n1, 1/1/n2, 1/2/n1, 1/2/n2]. This denotes shelf/rack/port. 
-
-    CAUTION: Other specific configuration changing methods should be dealt with caution. Unless you have highly specific configuration requirements, refrain from using other options. Use the change_configuration method instead.
-
+    :type ip_address: str
     """
 
     def __init__(self, ip_address='10.10.10.92'):
@@ -47,12 +35,14 @@ class TFlex:
             self.__get_config()
 
     def read_pm_data(self, line_port, sleep_counter=10, DEBUG=False):
-
         """ Method to read the performance monitoring data from the Teraflex device
+
         :param line_port: line port number
         :type line_port: str
+
         :param sleep_counter: sleep time in seconds, default is 10. Teraflex device needs 10 seconds of time to stabliize the measurements before reading PM data. Increase this value if the device is not stable. Alternatively, decrease this value for testing.
         :type sleep_counter: int
+
         :param DEBUG: set to True to print the PM data
         :type DEBUG: bool
 
@@ -122,18 +112,25 @@ class TFlex:
         rolloff=0.19,
     ):
         """ Method to change the configuration of the Teraflex device
+
         :param line_port: line port number
         :type line_port: str
+
         :param logical_interface: logical interface number such as 'ot200'. This depends on the bandwidth and bit rate of the signal chosen. Refer to documentation for available options. For example, 'ot200' is for 200G signal.
         :type logical_interface: str
+
         :param modulation: modulation scheme such as 'dp-qam16', 'dp-qam64', 'dp-qpsk'. Refer to documentation for available options. This is tied to the logical interface used. Some modulations are not available for all logical interfaces.
         :type modulation: str
+
         :param target_power: target output power in dBm. Should be in the range of [-2.0,2.0] dBm
         :type target_power: float
+
         :param central_frequency: central frequency in THz. Should be in the units of GHz. For example, 193.1 THz should be given as 193100 GHz
         :type central_frequency: float
+
         :param fec: Forward Error Correction algorithm. Default is 'sdfec-acacia15-7iterations'. Refer to documentation for available options.
         :type fec: str
+
         :param rolloff: filter roll-off factor. Default is 0.19. Refer to documentation for available options.
         :type rolloff: float
 
@@ -173,9 +170,11 @@ class TFlex:
 
     def return_current_config(self):
         """ Method to return the current configuration of the Teraflex device
+
         :return: dictionary containing the current configuration
         :rtype: dict
         """
+
         return self._config
 
     def __get_config(self):
@@ -276,8 +275,10 @@ class TFlex:
 
     def get_operational_state(self, line_port):
         """ Method to get the operational state of the Teraflex device
+
         :param line_port: line port number from [1/1/n1, 1/1/n2, 1/2/n1, 1/2/n2]
         :type line_port: str
+
         :return: operational state of the Teraflex device
         :rtype: str
         """
@@ -297,7 +298,9 @@ class TFlex:
 
     def get_interface(self):
         """ Method to get the interface configuration of the Teraflex device
+
         :return: interface configuration"""
+
         request = """
         <terminal-device xmlns="http://openconfig.net/yang/terminal-device">
         <logical-channels>
@@ -317,8 +320,10 @@ class TFlex:
 
     def delete_logical_interface(self, line_port):
         """ Method to delete the logical interface of the Teraflex device. This must be used before creating a new logical interface.
+
         :param line_port: line port number
         :type line_port: str
+
         :return: response from the Teraflex device"""
 
         request = f"""
@@ -344,6 +349,7 @@ class TFlex:
 
     def create_logical_interface(self, line_port, logical_interface):
         """ Method to create a new logical interface of the Teraflex device such as 'ot200' for a particular line port.
+
         :param line_port: line port number
         :type line_port: str
 
@@ -373,8 +379,8 @@ class TFlex:
         return response
 
     def get_interface_modulation(self, line_port):
-
         """ Method to get the modulation scheme of the Teraflex device
+
         :param line_port: line port number
         
         :return: modulation scheme
@@ -405,8 +411,8 @@ class TFlex:
         return self.conn.get_config(source="running", filter=flt)
 
     def set_interface_modulation(self, line_port, modulation):
-
         """ Method to set the modulation scheme of the Teraflex device such as 'dp-16qam', 'dp-64qam', 'dp-qpsk' for a particular line port.
+
         :param line_port: line port number
         :type line_port: str
 
@@ -448,8 +454,8 @@ class TFlex:
         return response
 
     def get_power_and_frequency(self, line_port):
-
         """ Method to get the power and frequency of the Teraflex device for a particular line port
+
         :param line_port: line port number
         :type line_port: str
         
@@ -475,10 +481,11 @@ class TFlex:
         return self.conn.get_config(source="running", filter=flt)
 
     def set_power_and_frequency(self, line_port, power, frequency):
-
         """ Method to set the power and frequency of the Teraflex device for a particular line port
+
         :param line_port: line port number
         :type line_port: str
+
         :param power: target output power in dBm. Should be in the range of [-2.0,2.0] dBm
         :type power: float
 
@@ -514,24 +521,24 @@ class TFlex:
         return response
 
     def set_interface_on(self, line_port):
-
         """ Method to set the interface state of the Teraflex device to 'is' (in-service)
+
         :param line_port: line port number
         :type line_port: str"""
 
         return self.set_interface_state(1, line_port)
 
     def set_interface_off(self, line_port):
-            
         """ Method to set the interface state of the Teraflex device to 'oos' (out-of-service)
+
         :param line_port: line port number
         :type line_port: str"""
 
         return self.set_interface_state(0, line_port)
 
     def set_interface_state(self, state, line_port):
-
         """ Method to set the interface state of the Teraflex device to 'is' (in-service) or 'oos' (out-of-service)
+
         :param state: 1 for 'is' (in-service) and 0 for 'oos' (out-of-service)
         :type state: int
 
@@ -568,8 +575,8 @@ class TFlex:
         return response
 
     def get_interface_state(self, line_port):
-
         """ Method to get the interface state of the Teraflex device
+
         :param line_port: line port number
         :type line_port: str
 
@@ -616,11 +623,7 @@ class TFlex:
         return self.conn.edit_config(target="running", config=request)
 
     def __remove_admin_maintenance(self, element):
-        """
 
-        :param element: line_port or logical interface e.g. 1/2/n1 or 1/2/n1/ot200
-        :return:
-        """
         request = f"""
         <nc:config xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
           <managed-element xmlns="http://www.advaoptical.com/aos/netconf/aos-core-managed-element"
@@ -643,6 +646,7 @@ class TFlex:
 
     def get_port_admin_state(self, line_port):
         """ Method to get the port admin state of the Teraflex device
+
         :param line_port: line port number
         :type line_port: str
         
@@ -667,8 +671,8 @@ class TFlex:
         return self.conn.get_config(source="running", filter=flt)
 
     def get_params(self, line_port, DEBUG=False):
-
         """ Method to get the BER historical readings of the Teraflex device for a particular line port. 
+
         CAUTION: This method is not recommended for real-time monitoring. Use read_pm_data method instead.
 
         :param line_port: line port number
@@ -752,12 +756,14 @@ class TFlex:
 
     def get_symbolrate(self, line_port):
         """ Method to get the symbol rate of the Teraflex device
+
         :param line_port: line port number
         :type line_port: str
 
         :return: symbol rate
         :rtype: str
         """
+
         request = f"""
                        <components>
                          <component>
@@ -781,13 +787,16 @@ class TFlex:
 
     def set_filterrolloff(self, line_port, rolloff):
         """ Method to set the filter roll-off factor of the Teraflex device
+
         :param line_port: line port number
         :type line_port: str
+
         :param rolloff: filter roll-off factor. Default is 0.19. Refer to documentation for available options.
         :type rolloff: float
 
         :return: response from the Teraflex device
         """
+
         request = f"""
                             <nc:config xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
                                 <managed-element xmlns="http://www.advaoptical.com/aos/netconf/aos-core-managed-element"
@@ -820,8 +829,8 @@ class TFlex:
         return response
 
     def get_filterrolloff(self, line_port):
-
         """ Method to get the filter roll-off factor of the Teraflex device
+
         :param line_port: line port number
         :type line_port: str
 
@@ -853,8 +862,8 @@ class TFlex:
         return self.conn.get_config(source="running", filter=flt)
 
     def get_fec_algorithm(self, line_port):
-
         """ Method to get the FEC algorithm of the Teraflex device
+
         :param line_port: line port number
         :type line_port: str
 
@@ -881,10 +890,9 @@ class TFlex:
         return self.conn.get_config(source="running", filter=flt)
 
     def set_fec_algorithm(self, line_port, fec='sdfec-acacia15-7iterations'):
-
         """ Method to set the FEC algorithm of the Teraflex device
-        :param line_port: line port number
 
+        :param line_port: line port number
         :type line_port: str
 
         :param fec: Forward Error Correction algorithm. Default is 'sdfec-acacia15-7iterations'. Refer to documentation for available options.
