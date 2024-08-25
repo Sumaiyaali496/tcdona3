@@ -17,5 +17,6 @@ Contents
    Home <self>
    Getting Started
    polatis
+   teraflex
    Lumentum
    Monitor

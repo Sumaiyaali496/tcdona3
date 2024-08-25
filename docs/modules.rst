@@ -5,3 +5,5 @@ tcdona3
    :maxdepth: 4
 
    polatis
+   teraflex
+   utils
