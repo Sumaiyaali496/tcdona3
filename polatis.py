@@ -20,8 +20,10 @@ class Polatis:
     
     :param host: The IP address of the Polatis switch, defaults to 10.10.10.28"
     :type host: str
+
     :param port: The port number of the Polatis switch, defaults to 3082
     :type port: str
+
     :return: None
     :rtype: None
     """
@@ -84,6 +86,7 @@ class Polatis:
 
         :param inx: The name of the component.
         :type inx: str
+
         :return: The mapped Polatis port number.
         :rtype: int
         """
@@ -102,6 +105,7 @@ class Polatis:
 
         :param outx: The name of the component.
         :type outx: str
+
         :return: The mapped Polatis port number.
         :rtype: int
         """
@@ -249,6 +253,7 @@ class Polatis:
 
         :param equipment_1: The name of the first equipment.
         :type equipment_1: str
+
         :param equipment_2: The name of the second equipment.
         :type equipment_2: str
 
@@ -396,6 +401,7 @@ class Polatis:
 
         :param patch_list: A list of patches, where each patch is a list of ports.
         :type patch_list: list
+
         :param username: The username to allocate the ports to.
         :type username: str
 
@@ -475,6 +481,7 @@ class Polatis:
 
         :param patch_list: A list of patches, where each patch is a list of ports.
         :type patch_list: list
+
         :param filename: The location of the CSV file.
         :type filename: str
 
@@ -595,6 +602,7 @@ class Polatis:
 
         :param port: The port number.
         :type port: int
+        
         :return: The power of the port.
         :rtype: float
         """
