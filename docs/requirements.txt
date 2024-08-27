@@ -4,3 +4,4 @@ pandas
 mysql-connector-python
 ncclient
 xmltodict
+pyvisa

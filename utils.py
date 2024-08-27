@@ -1,5 +1,11 @@
 import mysql.connector
 import os
+import math
+
+FIRST_CENTRAL_FREQ = 191350.0
+CHANNEL_SPACING = 50.0
+CHANNEL_WIDTH = 50.0
+wdm_channel_list = list(range(1,96))
 
 def check_patch_owners(patch_list):
 
@@ -72,3 +78,58 @@ def check_patch_owners(patch_list):
         cursor.close()
         conn.close()
         return True
+    
+
+
+def db_to_abs(db_value):
+    """ Function to convert dB to absolute value
+
+    :param db_value
+    :type db_value: list or float
+
+    :return: Absolute value in Watts
+    """
+    absolute_value = 10 ** (db_value / float(10))
+    return absolute_value
+
+
+def abs_to_db(absolute_value):
+
+    """ Function to convert absolute value to dB 
+
+    :param absolute_value
+    :type absolute_value: list or float
+
+    :return: dB value
+    """
+    db_value = 10 * math.log10(absolute_value)
+    return db_value
+
+
+def abs_to_dbm(absolute_value):
+    """Function to convert absolute value to dBm
+
+    :param absolute_value
+    :type absolute_value: list or float
+
+    :return: dBm value
+    """
+    dbm_value = 10 * math.log10(absolute_value / 1e-3)
+    return dbm_value
+
+def get_freq_range(channel_num):
+    """Function to get the frequency range of a channel number according to the 95 x 50 GHz grid defined by ITU-T G.694.1
+
+    :param channel_num: Channel number in the range [1,95]
+    :type channel_num: int
+
+    :return: Start frequency, central frequency, and end frequency of the channel in THz
+    :rtype: tuple
+    """
+
+    central_freq = FIRST_CENTRAL_FREQ + (channel_num-1)*CHANNEL_SPACING
+    start_freq = central_freq - CHANNEL_WIDTH/2.0
+    end_freq = central_freq + CHANNEL_WIDTH/2.0
+
+    return int(start_freq), int(central_freq), int(end_freq)
+
