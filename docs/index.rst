@@ -22,3 +22,4 @@ Contents
    utils
    Lumentum
    Monitor
+   resources
