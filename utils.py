@@ -5,19 +5,19 @@ import math
 FIRST_CENTRAL_FREQ = 191350.0
 CHANNEL_SPACING = 50.0
 CHANNEL_WIDTH = 50.0
-wdm_channel_list = list(range(1,96))
+wdm_channel_list = list(range(1, 96))
+
 
 def check_patch_owners(patch_list):
 
     """Check if the ports in the patch list are available and are allocated to the running user.
-    
+
     :param patch_list: A list of patches, where each patch is a list of ports.
     :type patch_list: list
 
     :return: True if all ports are available and allocated to the running user, False otherwise.
     :rtype: bool
     """
-
 
     # Get the Unix user behind sudo
     unix_user = os.getenv("SUDO_USER")
@@ -45,11 +45,11 @@ def check_patch_owners(patch_list):
             if not result:
                 nonexistent_ports.append(port)
             else:
-                #if len(owner) == 0:
+                # if len(owner) == 0:
                 #    nonexistent_ports.append(port)
-                owner=result[0]
-                if len(owner)!=0 and unix_user not in owner.split(','):
-                    other_owners.append(result)
+                owner = result[0]
+                if len(owner) != 0 and unix_user not in owner.split(","):
+                    other_owners.append((port, owner))
     if (len(nonexistent_ports) > 0) or (len(other_owners) > 0):
         # Close the cursor and connection
         cursor.close()
@@ -78,11 +78,10 @@ def check_patch_owners(patch_list):
         cursor.close()
         conn.close()
         return True
-    
 
 
 def db_to_abs(db_value):
-    """ Function to convert dB to absolute value
+    """Function to convert dB to absolute value
 
     :param db_value
     :type db_value: list or float
@@ -95,7 +94,7 @@ def db_to_abs(db_value):
 
 def abs_to_db(absolute_value):
 
-    """ Function to convert absolute value to dB 
+    """Function to convert absolute value to dB
 
     :param absolute_value
     :type absolute_value: list or float
@@ -117,6 +116,7 @@ def abs_to_dbm(absolute_value):
     dbm_value = 10 * math.log10(absolute_value / 1e-3)
     return dbm_value
 
+
 def get_freq_range(channel_num):
     """Function to get the frequency range of a channel number according to the 95 x 50 GHz grid defined by ITU-T G.694.1
 
@@ -127,9 +127,8 @@ def get_freq_range(channel_num):
     :rtype: tuple
     """
 
-    central_freq = FIRST_CENTRAL_FREQ + (channel_num-1)*CHANNEL_SPACING
-    start_freq = central_freq - CHANNEL_WIDTH/2.0
-    end_freq = central_freq + CHANNEL_WIDTH/2.0
+    central_freq = FIRST_CENTRAL_FREQ + (channel_num - 1) * CHANNEL_SPACING
+    start_freq = central_freq - CHANNEL_WIDTH / 2.0
+    end_freq = central_freq + CHANNEL_WIDTH / 2.0
 
     return int(start_freq), int(central_freq), int(end_freq)
-

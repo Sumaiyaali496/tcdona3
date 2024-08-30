@@ -1,7 +1,7 @@
 import sys
 import telnetlib
 import re
-from pandas import *
+import pandas as pd
 import time
 import os, getpass
 from datetime import datetime
@@ -16,8 +16,8 @@ def timeStamped(fname, fmt="%Y-%m-%d_{fname}"):
 
 class Polatis:
 
-    """ Polatis class to interact with Polatis switch using telnet
-    
+    """Polatis class to interact with Polatis switch using telnet
+
     :param host: The IP address of the Polatis switch, defaults to 10.10.10.28"
     :type host: str
 
@@ -69,10 +69,12 @@ class Polatis:
     def __disable_all(self):
         line = "OPR-PORT-SHUTTER::1&&640:123:;"
         lines = self.__sendcmd(line)
+        return lines
 
     def __enable_all(self):
         line = "RLS-PORT-SHUTTER::1&&640:123:;"
         lines = self.__sendcmd(line)
+        return lines
 
     def __settimeout(self, timeout=60):
         return self.__sendcmd("ED-EQPT::TIMEOUT:123:::ADMIN=" + str(timeout) + ";")
@@ -155,7 +157,7 @@ class Polatis:
 
     def apply_patch_list(self, patch_list):
 
-        """ Apply a list of patches to the Polatis switch. The patch list is a list of tuples, where each tuple contains two elements: the input component and the output component.
+        """Apply a list of patches to the Polatis switch. The patch list is a list of tuples, where each tuple contains two elements: the input component and the output component.
 
         :param patch_list: A list of patches, where each patch is a list of ports.
         :type patch_list: list
@@ -168,7 +170,6 @@ class Polatis:
         :rtype: None
 
         """
-
 
         if not isinstance(patch_list, list):
             raise Exception("Argument patch_list must be a list of tuples of patches")
@@ -208,7 +209,7 @@ class Polatis:
             max_inpower = cursor.fetchone()
             max_inpower = max_inpower[0] if max_inpower else None
 
-            inpower = self.get_power(int(inp))
+            inpower = self.get_port_power(int(inp))
             if max_inpower:
                 max_inpower_val = float(max_inpower)
             else:
@@ -223,12 +224,12 @@ class Polatis:
                     outp,
                     max_inpower_val,
                 )
-                #self.logger("Patch max power exceeded: %s" % message)
+                # self.logger("Patch max power exceeded: %s" % message)
                 raise Exception("Patch max power exceeded: %s" % message)
             else:
                 self.__conn(inp, outp)
                 time.sleep(1)
-                outpower = self.get_power(int(outp))
+                outpower = self.get_port_power(int(outp))
                 data = "%s (%s): %.2f dBm ---> %s (%s): %.2f dBm < %.2f dBm" % (
                     input_comp,
                     inp,
@@ -239,22 +240,20 @@ class Polatis:
                     max_inpower_val,
                 )
                 print(data)
-
-                now = datetime.now()
-                #self.logger("Connect %s" % (data))
+                # self.logger("Connect %s" % (data))
 
         # Close the cursor and connection
         cursor.close()
         conn.close()
 
-    def disconnect_equipment(self, equipment_1, equipment_2):
+    def disconnect_devices(self, equipment_1, equipment_2):
 
-        """ Disconnect patching between two eqipments from the Polatis switch.
+        """Disconnect patching between two devices from the Polatis switch.
 
-        :param equipment_1: The name of the first equipment.
+        :param equipment_1: The name of the first device.
         :type equipment_1: str
 
-        :param equipment_2: The name of the second equipment.
+        :param equipment_2: The name of the second device.
         :type equipment_2: str
 
         return: None
@@ -265,12 +264,9 @@ class Polatis:
 
         self.disconnect_patch_list([(equipment_1, equipment_2)])
 
-
-
     def disconnect_patch_list(self, patch_list):
 
-
-        """ Disconnect a list of patches from the Polatis switch. The patch list is a list of tuples, where each tuple contains two elements: the input component and the output component.
+        """Disconnect a list of patches from the Polatis switch. The patch list is a list of tuples, where each tuple contains two elements: the input component and the output component.
 
         :param patch_list: A list of patches, where each patch is a list of ports.
         :type patch_list: list
@@ -293,7 +289,7 @@ class Polatis:
             raise Exception(
                 "apply_patch_list failed, some (or all) ports are not available. Please contact admin."
             )
-        
+
         # Connect to the MySQL database
         conn = mysql.connector.connect(
             host="127.0.0.1", user="testbed", password="mypassword", database="provdb"
@@ -315,14 +311,11 @@ class Polatis:
             )
             outp = cursor.fetchone()[0]
 
-
-
             self.__disconn(inp, outp)
             time.sleep(1)
         # Close the cursor and connection
         cursor.close()
         conn.close()
-
 
     def check_patch_owners(self, patch_list):
 
@@ -334,7 +327,6 @@ class Polatis:
         :return: True if all ports are available and allocated to the running user, False otherwise.
         :rtype: bool
         """
-
 
         # Get the Unix user behind sudo
         unix_user = os.getenv("SUDO_USER")
@@ -362,11 +354,11 @@ class Polatis:
                 if not result:
                     nonexistent_ports.append(port)
                 else:
-                    #if len(owner) == 0:
+                    # if len(owner) == 0:
                     #    nonexistent_ports.append(port)
-                    owner=result[0]
-                    if len(owner)!=0 and unix_user not in owner.split(','):
-                        other_owners.append(result)
+                    owner = result[0]
+                    if len(owner) != 0 and unix_user not in owner.split(","):
+                        other_owners.append((port, owner))
         if (len(nonexistent_ports) > 0) or (len(other_owners) > 0):
             # Close the cursor and connection
             cursor.close()
@@ -397,7 +389,7 @@ class Polatis:
             return True
 
     def release_ports(self, patch_list, username):
-        """ ADMIN ONLY: Allocate the ports in the patch list to user/NULL.
+        """ADMIN ONLY: Allocate the ports in the patch list to user/NULL.
 
         :param patch_list: A list of patches, where each patch is a list of ports.
         :type patch_list: list
@@ -407,7 +399,7 @@ class Polatis:
 
         :return: None
         :rtype: None
-        
+
         """
 
         with open("/etc/secure_keys/mysql_key.key", "r") as file:
@@ -457,23 +449,14 @@ class Polatis:
             raise Exception("Argument patch_list must be a list of tuples of patches")
         if len(patch_list) == 0:
             raise Exception("Argument patch_list must not be empty")
-
-        field_names = ["#", "Component", "I/O", "Port", "Power (dBm)"]
-        while True:
-            n = 0
-            print('\t'.join(field_names))
-            for patch in patch_list:
-                inx, outx = patch
-                inp = self.get_inport(inx)
-                outp = self.get_outport(outx)
-                inpower = self.get_power(int(inp))
-                outpower = self.get_power(int(outp))
-                print('\t'.join([str(i) for i in [n, inx, "Out", inp, inpower]]))
-                print('\t'.join([str(i) for i in [n + 1, outx, "In", outp, outpower]]))
-                n += 2
-            input_txt = input("Enter Y to continue..., otherwise Exit")
-            if str(input_txt).lower() != "y":
-                break
+        for patch in patch_list:
+            inx, outx = patch
+            inp = self.get_inport(inx)
+            outp = self.get_outport(outx)
+            inpower = self.get_port_power(int(inp))
+            outpower = self.get_port_power(int(outp))
+            data = f"{inx}({inp}): {inpower} dBm ----> {outx}({outp}): {outpower} dBm"
+            print(data)
 
     def get_patch_table_csv(self, patch_list, filename):
         """
@@ -495,12 +478,12 @@ class Polatis:
         if len(patch_list) == 0:
             raise Exception("Argument patch_list must not be empty")
         data = []
-        for n, patch in enumerate(patch_list, start=1):
+        for patch in patch_list:
             inx, outx = patch
             inp = self.get_inport(inx)
             outp = self.get_outport(outx)
-            inpower = self.get_power(int(inp))
-            outpower = self.get_power(int(outp))
+            inpower = self.get_port_power(int(inp))
+            outpower = self.get_port_power(int(outp))
             data.append([inx, "Out", inp, inpower])
             data.append([outx, "In", outp, outpower])
         with open(filename, "w") as f:
@@ -518,7 +501,6 @@ class Polatis:
     def get_all_patch(self):
         line = "RTRV-PATCH:::123:;"
         lines = self.__sendcmd(line)
-        ret = ""
         for line in lines.split("\n"):
             m = re.match(r'\W*"(\d+),(\d+)"', line)
             if m:
@@ -578,7 +560,6 @@ class Polatis:
     def test_all_power(self):
         self.get_all_power()
         while True:
-            ch = input("(dis)connect patch ..")
             line = "RTRV-PORT-POWER::1&&640:123:;"
             lines = self.__sendcmd(line)
             for line in lines.split("\n"):
@@ -597,12 +578,12 @@ class Polatis:
                         )
                     self.power[port] = float(power)
 
-    def get_power(self, port):
-        """ Get the power of a port. The ports must be the absolute port number, not the component name. 
+    def get_port_power(self, port):
+        """Get the power of a port. The ports must be the absolute port number, not the component name.
 
         :param port: The port number.
         :type port: int
-        
+
         :return: The power of the port.
         :rtype: float
         """
@@ -613,6 +594,24 @@ class Polatis:
             if m:
                 return float(m.group(2))
         return -99.99
+
+    def get_device_power(self, equipment, io):
+        """Get the input/output power of a device.
+
+        :param port: The name of the device
+        :type port: str
+
+        :param io: The input/output port of the device, either "in" or "out".
+        :type io: str
+
+        :return: The power of the port.
+        :rtype: float
+        """
+        if io == "in":
+            port = int(self.get_outport(equipment))
+        elif io == "out":
+            port = int(self.get_inport(equipment))
+        return self.get_port_power(port)
 
     def getall(self):
         self.get_all_patch()
@@ -630,5 +629,3 @@ class Polatis:
             atime = self.atime.get(i, 0.0)
             power = self.power.get(i, 0.0)
             print(i, patch, shutter, monmode, wavelength, offset, atime, power)
-
-
