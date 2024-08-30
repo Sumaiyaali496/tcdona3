@@ -5,9 +5,7 @@ from utils import check_patch_owners
 
 class OSA:
 
-    """Class to interface with the Anritsu Optical Spectrum Analyzer (OSA)
-    The class provides methods to interact with the OSA and get the data from the screen of the OSA.
-    """
+    """Class to interface with the Anritsu Optical Spectrum Analyzer (OSA). The Anritsu OSA is connected to the testbed by GPIB interface. Hence, the class uses the pyvisa library to interact with the OSA."""
 
     def __init__(self):
         """Initialize the OSA. This method opens the resource manager and connects to the OSA. It also checks if the user is authorized to use the device. If the user is not authorized, it raises an Exception and does not connect to the device."""
@@ -112,7 +110,12 @@ class OSA:
         return self.osa.query("ATT?")
 
     def set_attn_status(self, status):
-        """Set the status of the internal optical attenuator. Anritsu MS9710C has an internal optical attenuator that can be turned on or off. The VOA must be turned on to measure high power signals."""
+        """Set the status of the internal optical attenuator. Anritsu MS9710C has an internal optical attenuator that can be turned on or off. The VOA must be turned on to measure high power signals. Setting the attenuator to “ON” will increase the noise floor by 20 dB.
+
+        :param status: 'ON' or 'OFF' -> Turn the internal optical attenuator On/Off
+        :type status: str
+
+        :return: None"""
 
         # Turn the internal optical attenuator On/Off
         if status.upper() == "ON":
