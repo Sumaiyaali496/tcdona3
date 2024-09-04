@@ -27,25 +27,43 @@ LUMENTUM_WSS_CHANNEL_FREQ_CENTER_LIST = [
     191350.0 + idx * 50.0 for idx in range(LUMENTUM_CHANNEL_QUANTITY)
 ]
 
+ip_map = {
+    "roadm_1": "10.10.10.38",
+    "roadm_2": "10.10.10.37",
+    "roadm_3": "10.10.10.33",
+    "roadm_4": "10.10.10.32",
+    "roadm_5": "10.10.10.31",
+    "roadm_6": "10.10.10.30",
+    "roadm_7": "10.10.10.29",
+    "roadm_8": "10.10.10.17",
+    "roadm_9": "10.10.10.16",
+}
+
 
 class Lumentum(object):
     """
     The Lumentum object class
     """
 
-    def __init__(self, ip_address, port=830, device_name="Lumentum ROADM", DEBUG=False):
+    def __init__(self, roadm_name, DEBUG=False):
+
+        if roadm_name not in ip_map:
+            raise ValueError("Invalid roadm_name")
+
+        if not check_patch_owners([(roadm_name + "_p1", roadm_name + "_line")]):
+            raise Exception("You are not authorized to use this device")
 
         self.m = manager.connect(
-            host=ip_address,
-            port=port,
+            host=ip_map[roadm_name],
+            port=830,
             username=LUMENTUM_USERNAME,
             password=LUMENTUM_PASSWORD,
             hostkey_verify=False,
         )
-        self.device_name = device_name
+        self.device_name = roadm_name
         self.DEBUG = DEBUG
         if self.DEBUG:
-            print("ROADM " + device_name + " initialized...!")
+            print("ROADM " + roadm_name + " initialized...!")
         self.edfa_info = {"booster": {}, "preamp": {}}
         self.wss_connections = {"mux": {}, "demux": {}}
         self.port_info = {}

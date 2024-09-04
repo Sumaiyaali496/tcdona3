@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import copy
 from collections import OrderedDict
 import pandas as pd
-from lumentum import Lumentum
+from lumentum import *
 from polatis import Polatis
 from ila import ILA
 from osa import OSA
@@ -17,6 +17,13 @@ from osa import OSA
 
 class Monitor:
     def __init__(self, device_object):
+        """Super Class for Monitoring Devices. Specific device monitoring classes should inherit from this class, and adhere to the defined methods.
+
+        :param device_object: Device object to monitor
+        :type device_object: Lumentum, Polatis, ILA, OSA
+
+        :raises ValueError: If device object is not a valid device object
+        """
 
         self.device = device_object
         if isinstance(device_object, Lumentum):
@@ -30,12 +37,61 @@ class Monitor:
         else:
             raise ValueError("Please specify a valid device object")
 
+    def measurement_sweep(self):
+        """Perform a measurement sweep of the device. This method should be implemented by the specific device monitoring class, and override the default method. The method should return a dictionary of the measurement data."""
+        pass
+
+    def measurement_state(self):
+        """Get the current state of the device. This method should be implemented by the specific device monitoring class, and override the default method. The method should return a dictionary of the device state."""
+        pass
+
+    def write_json_data(self, filename, **kwargs):
+        """Write measurement data to a json file. Additional data can be added to the json file by passing keyword arguments.
+
+        :param filename: Name of the file to save the data
+        :type filename: str
+
+        :param **kwargs: Additional data to be saved in the json file
+
+        :raises KeyboardInterrupt: If measurement is canceled by user
+        :raises RuntimeError: If measurement is canceled by exception
+        """
+
+        self.start_timer = datetime.now()
+
+        try:
+            measurement_state = self.measurement_state()
+            measurement_data = self.measurement_sweep()
+
+        except KeyboardInterrupt:
+            print("Measurement canceled by user. Save already collected data.")
+            raise KeyboardInterrupt
+
+        except Exception as e:
+            print("Measurement canceled by exception. Save already collected data.")
+            print(e)
+            raise RuntimeError
+
+        finally:
+            print("Measurement time:" + str((datetime.now() - self.start_timer)))
+            data_output = {
+                "measurement_time": str(datetime.now()),
+                "config": measurement_state,
+                "data": measurement_data,
+            }
+            for key, value in kwargs.items():
+                data_output[key] = value
+            data_output = OrderedDict(data_output)
+            file_name = f"{filename}.json"
+            with open(file_name, "w") as file_output:
+                json.dump(data_output, file_output, indent=4)
+
 
 class RoadmMonitor:
     def __init__(self, roadm_object):
 
-        self.roadm = roadm
-        self.device_name = roadm_name
+        self.roadm = roadm_object
+        self.device_name = self.roadm.roadm_name
         self.device_model = "Lumentum ROADM-20 Whitebox"
         self.roadm_wss_channel_freq_center_start = 191350.0
         self.roadm_wss_channel_spacing = 50.0
@@ -337,7 +393,7 @@ class RoadmMonitor:
         component,
         io="input",
         refresh=True,
-        notebook=False,
+        notebook=True,
         save=False,
         savepath=None,
         return_plot=False,
@@ -398,151 +454,20 @@ class RoadmMonitor:
         return [i[1] for i in list_of_tuples]
 
 
-class PolatisMonitor:
-    def __init__(self, patch_list=None):
+class PolatisMonitor(Monitor):
+    def __init__(self, device_object, patch_list=None):
 
-        self.plts = PolatisCustom("10.10.10.28", "3082", "test", "true")
-        self.plts.login()
+        self.plts = device_object
 
         if patch_list is not None:
             self.patch_list = patch_list
             self.patch_set = {component for patch in patch_list for component in patch}
 
-    def disconnect(self, patch_list=None):
+    def measurement_sweep():
+        pass
 
-        if patch_list is None:
-            patch_list = self.patch_list
-        elif patch_list is None and self.patch_list is None:
-            print("Please specify patch_list")
-
-        self.plts.disconn_patchlist(patch_list)
-        print(patch_list)
-        print("patch_list disconnected")
-
-    def patch(self, patch_list=None):
-
-        if patch_list is None:
-            patch_list = self.patch_list
-            self.patch_set = set()
-
-        print("Patching ...")
-        for patch in patch_list:
-            self.plts.patching2(*patch)
-            time.sleep(1)
-            self.patch_set.add(patch[0])
-            self.patch_set.add(patch[1])
-        time.sleep(10)
-
-    def get_port_info(self, port):
-
-        return OrderedDict(
-            {
-                "port": port,
-                "power": self.plts.power.get(port),
-                "patch": self.plts.patch.get(port),
-                "shutter": self.plts.shutter.get(port),
-                "monmode": self.plts.monmode.get(port),
-                "wavelength": self.plts.wavelength.get(port),
-                "offset": self.plts.offset.get(port),
-                "atime": self.plts.atime.get(port),
-            }
-        )
-
-    @staticmethod
-    def convert_patch_list_to_set(patch_list):
-
-        if isinstance(patch_list[0], tuple):
-            patch_set = {component for patch in patch_list for component in patch}
-        else:
-            patch_set = {component for component in patch_list}
-        return patch_set
-
-    def get_component_info(
-        self, measurement_label, patch_list=None, index="", repeat_index=1, uid=None
-    ):
-
-        if patch_list is None:
-            if self.patch_list is not None:
-                patch_list = self.patch_list
-            else:
-                raise ValueError("Please specify patch list")
-        patch_set = self.convert_patch_list_to_set(patch_list)
-
-        data_output = OrderedDict()
-
-        data_output["device_name"] = self.plts.NE_type()
-        data_output["measurement_label"] = measurement_label
-
-        print(
-            "\nPolatis measurement started at %s"
-            % str(self.start_timer.strftime("%Y.%m.%d.%H.%M.%S"))
-        )
-        self.plts.getall()
-        data_output["time"] = str(self.start_timer)
-        data_output["index"] = index
-        data_output["uid"] = uid
-        data_output["repeat_index"] = repeat_index
-
-        for component in patch_set:
-
-            inp = int(self.plts.ports.at[component, "In"])
-            outp = int(self.plts.ports.at[component, "Out"])
-
-            data_output[component] = OrderedDict(
-                {
-                    "type": str(self.plts.ports.at[component, "Device_type"]),
-                    "local_port": str(self.plts.ports.at[component, "Port"]),
-                    "location": str(self.plts.ports.at[component, "Location"]),
-                    "input": self.get_port_info(inp),
-                    "output": self.get_port_info(outp),
-                }
-            )
-        return data_output
-
-    def write_json_data(
-        self,
-        measurement_label,
-        patch_list=None,
-        DATAPREFIX="",
-        index="",
-        repeat_index=1,
-        uid=None,
-    ):
-
-        data_output = OrderedDict()
-        self.start_timer = datetime.now()
-
-        try:
-            data_output = self.get_component_info(
-                measurement_label=measurement_label,
-                patch_list=patch_list,
-                index=index,
-                repeat_index=repeat_index,
-                uid=uid,
-            )
-
-        except KeyboardInterrupt:
-            print("Polatis measurement canceled by user. Save already collected data.")
-            raise KeyboardInterrupt
-
-        except Exception as e:
-            print(
-                "Polatis measurement canceled by exception. Save already collected data."
-            )
-            print(e)
-            raise RuntimeError
-
-        finally:
-            file_name = "monitor_polatis_index" + str(index) + "_uid" + str(uid)
-            file_name_json = DATAPREFIX + file_name + ".json"
-            # Write to file
-            print(
-                "Polatis measurement finished at "
-                + str(datetime.now().strftime("%Y.%m.%d.%H.%M.%S"))
-            )
-            print("Measurement time:" + str((datetime.now() - self.start_timer)))
-            with open(file_name_json, "w") as file_output:
-                json.dump(data_output, file_output, indent=4)
+    def measurement_state():
+        pass
 
 
 class ILAMonitor:
