@@ -37,7 +37,7 @@ The Anritsu OSA (Optical Spectrum Analyzer) has excellent wavelength and level s
 Anritsu ``OSA`` API
 *****************************
 
-.. automodule:: tcdona3.osa
+.. automodule:: osa
    :members:
    :undoc-members:
    :show-inheritance:

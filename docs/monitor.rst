@@ -1,7 +1,7 @@
 Monitor
 ==============
 
-.. automodule:: tcdona3.monitor
+.. automodule:: monitor
    :members:
    :undoc-members:
    :show-inheritance:

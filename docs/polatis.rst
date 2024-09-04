@@ -54,7 +54,7 @@ The patch list can be found `here <https://docs.google.com/spreadsheets/d/11gGln
 
 ``Polatis`` API
 *****************************
-.. autoclass:: tcdona3.polatis.Polatis
+.. autoclass:: polatis
    :members:
    :undoc-members:
    :show-inheritance:

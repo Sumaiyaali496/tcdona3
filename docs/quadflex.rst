@@ -21,7 +21,7 @@ Our FSP 3000 QuadFlex™ is a q00Gbit/s module capable of multiplexing up to two
 ``Quadflex`` API
 **************************
 
-.. automodule:: tcdona3.quadflex
+.. automodule:: quadflex
    :members:
    :undoc-members:
    :show-inheritance:
