@@ -5,7 +5,7 @@ from paramiko import *
 import re
 import sys
 import time
-from .utils import check_patch_owners, load_csv_with_pandas
+from utils import *
 
 
 class Cassini:

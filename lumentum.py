@@ -3,7 +3,7 @@ import time
 import xmltodict
 from ncclient import manager
 from ncclient.xml_ import to_ele
-from .utils import get_freq_range, check_patch_owners
+from utils import *
 import pprint
 
 pp = pprint.PrettyPrinter(depth=4)
