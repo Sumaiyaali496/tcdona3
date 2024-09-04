@@ -15,13 +15,13 @@ Our FSP 3000 QuadFlex™ is a q00Gbit/s module capable of multiplexing up to two
    #. ot100: represents 100G/DP-QPSK modulation
 
 .. Caution::
-   #. Other specific configuration changing methods should be dealt with caution. Unless you have highly specific configuration requirements, refrain from using other options. Use the :meth:`quadflex.QuadFlex.change_configuration` method instead.
+   #. Other specific configuration changing methods should be dealt with caution. Unless you have highly specific configuration requirements, refrain from using other options. Use the :meth:`tcdona3.quadflex.QFlex.change_configuration` method instead.
    #. Being an older model, Quadflex offers a more limited functionality and performance as compared to the Teraflex. 
 
 ``Quadflex`` API
 **************************
 
-.. automodule:: quadflex
+.. automodule:: tcdona3.quadflex
    :members:
    :undoc-members:
    :show-inheritance:

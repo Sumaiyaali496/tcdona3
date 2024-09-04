@@ -1,7 +1,7 @@
 Lumentum ROADM
 ===============
 
-.. automodule:: lumentum
+.. automodule:: tcdona3.lumentum
    :members:
    :undoc-members:
    :show-inheritance:
