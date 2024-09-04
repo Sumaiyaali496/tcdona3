@@ -5,6 +5,7 @@ from ncclient import manager
 from ncclient.xml_ import to_ele
 from .utils import get_freq_range, check_patch_owners
 import pprint
+
 pp = pprint.PrettyPrinter(depth=4)
 
 LUMENTUM_USERNAME = "superuser"
@@ -1840,7 +1841,8 @@ class Lumentum(object):
         central_freq_input=191350.0,
         loss=LUMENTUM_DEFAULT_WSS_LOSS,
         open_channels=[],
-        channel_additional_attenuations=None):
+        channel_additional_attenuations=None,
+    ):
 
         """
         Generate an array of WSSConnection class objects in a DWDM setting
@@ -1906,7 +1908,7 @@ class Lumentum(object):
             )
             mux_conn_list.append(conn)
 
-        self.wss_delete_connection(mux_wss_id, "all")
+        self.wss_delete_connection(LUMENTUM_MUX, "all")
         self.wss_add_connections(mux_conn_list)
         print("Done")
 
@@ -1933,7 +1935,7 @@ class Lumentum(object):
             )
             demux_conn_list.append(conn)
 
-        self.wss_delete_connection(demux_wss_id, "all")
+        self.wss_delete_connection(LUMENTUM_DEMUX, "all")
         self.wss_add_connections(demux_conn_list)
         print("Done")
 
@@ -2167,217 +2169,3 @@ class Lumentum(object):
             )
             wss_connections_dwdm.append(cur_conn)
         return wss_connections_dwdm
-
-    # def make_one_wide_channel_mux(
-    #     self, start=191325.0, end=196125.0, in_port=4101, out_port=4201
-    # ):
-    #     self.wss_delete_connection(1, "all")
-    #     wss_connections_dwdm = []
-    #     cur_conn = Lumentum.WSSConnection(
-    #         1,
-    #         1,
-    #         LUMENTUM_INSERVICE,
-    #         "false",
-    #         in_port,
-    #         out_port,
-    #         str(start),
-    #         str(end),
-    #         "0.0",
-    #         "CH1",
-    #     )
-    #     wss_connections_dwdm.append(cur_conn)
-    #     self.wss_add_connections(wss_connections_dwdm)
-    #     return wss_connections_dwdm
-
-    # def make_one_wide_channel_demux(
-    #     self, start=191325.0, end=196125.0, in_port=5101, out_port=5201
-    # ):
-    #     self.wss_delete_connection(2, "all")
-    #     wss_connections_dwdm = []
-    #     cur_conn = Lumentum.WSSConnection(
-    #         2,
-    #         1,
-    #         LUMENTUM_INSERVICE,
-    #         "false",
-    #         in_port,
-    #         out_port,
-    #         str(start),
-    #         str(end),
-    #         "0.0",
-    #         "CH1",
-    #     )
-    #     wss_connections_dwdm.append(cur_conn)
-    #     self.wss_add_connections(wss_connections_dwdm)
-    #     return wss_connections_dwdm
-
-    # def make_channel_chunk_mux(self, chunk, in_port=4101, out_port=4201):
-    #     self.wss_delete_connection(1, "all")
-    #     wss_connections_dwdm = []
-    #     channel_num = 1
-    #     for channel in chunk:
-    #         start, end, port = channel
-    #         in_port = 4100 + port
-    #         cur_conn = Lumentum.WSSConnection(
-    #             1,
-    #             channel_num,
-    #             LUMENTUM_INSERVICE,
-    #             "false",
-    #             in_port,
-    #             out_port,
-    #             str(start),
-    #             str(end),
-    #             "0.0",
-    #             "CH" + str(channel_num),
-    #         )
-    #         wss_connections_dwdm.append(cur_conn)
-    #         channel_num += 1
-    #     self.wss_add_connections(wss_connections_dwdm)
-    #     return wss_connections_dwdm
-
-    # def make_channel_chunk_demux(self, chunk, in_port=5101, out_port=5201):
-    #     self.wss_delete_connection(2, "all")
-    #     wss_connections_dwdm = []
-    #     channel_num = 1
-    #     for channel in chunk:
-    #         start, end, port = channel
-    #         out_port = 5200 + port
-    #         cur_conn = Lumentum.WSSConnection(
-    #             2,
-    #             channel_num,
-    #             LUMENTUM_INSERVICE,
-    #             "false",
-    #             in_port,
-    #             out_port,
-    #             str(start),
-    #             str(end),
-    #             "0.0",
-    #             "CH" + str(channel_num),
-    #         )
-    #         wss_connections_dwdm.append(cur_conn)
-    #         channel_num += 1
-    #     self.wss_add_connections(wss_connections_dwdm)
-    #     return wss_connections_dwdm
-
-    # def make_n_channel_chunk_mux(
-    #     self,
-    #     start_freq,
-    #     channel_width,
-    #     channel_spacing,
-    #     in_port=4101,
-    #     out_port=4201,
-    #     min_f=191300,
-    #     max_f=196100,
-    #     mux_loss=0.0,
-    #     blocked=False,
-    # ):
-    #     self.wss_delete_connection(1, "all")
-    #     wss_connections_dwdm = []
-    #     log = "working"
-
-    #     if blocked:
-    #         blocking = "true"
-    #     else:
-    #         blocking = "false"
-
-    #     # check min frequency
-    #     if start_freq < min_f:
-    #         log = (
-    #             "Start frequency too small, please choose a value greater or equal to: ",
-    #             str(min_f),
-    #         )
-    #         return log, wss_connections_dwdm
-
-    #     # create list of freq chuncks
-    #     channel_num = 1
-    #     chunk = list()
-    #     f_s = start_freq
-    #     f_e = start_freq + channel_width
-    #     chunk.append((f_s, f_e, channel_num))
-    #     while f_e + channel_spacing <= max_f:
-    #         channel_num += 1
-    #         f_s = f_s + channel_spacing
-    #         f_e = f_e + channel_spacing
-    #         chunk.append((f_s, f_e, channel_num))
-
-    #     # create channels
-    #     for channel in chunk:
-    #         start, end, num = channel
-    #         cur_conn = Lumentum.WSSConnection(
-    #             1,
-    #             num,
-    #             LUMENTUM_INSERVICE,
-    #             blocking,
-    #             in_port,
-    #             out_port,
-    #             str(start),
-    #             str(end),
-    #             "{:.2f}".format(mux_loss),
-    #             "CH" + str(num),
-    #         )
-    #         wss_connections_dwdm.append(cur_conn)
-    #         num += 1
-    #     self.wss_add_connections(wss_connections_dwdm)
-    #     log = "Ok"
-    #     return log, wss_connections_dwdm
-
-    # def make_n_channel_chunk_demux(
-    #     self,
-    #     start_freq,
-    #     channel_width,
-    #     channel_spacing,
-    #     in_port=5101,
-    #     out_port=5201,
-    #     min_f=191300,
-    #     max_f=196100,
-    #     demux_loss=0.0,
-    #     blocked=False,
-    # ):
-    #     self.wss_delete_connection(2, "all")
-    #     wss_connections_dwdm = []
-    #     log = "working"
-
-    #     if blocked:
-    #         blocking = "true"
-    #     else:
-    #         blocking = "false"
-
-    #     # check min frequency
-    #     if start_freq < min_f:
-    #         log = (
-    #             "Start frequency too small, please choose a value greater or equal to: ",
-    #             str(min_f),
-    #         )
-    #         return log, wss_connections_dwdm
-
-    #     # create list of freq chuncks
-    #     channel_num = 1
-    #     chunk = list()
-    #     f_s = start_freq
-    #     f_e = start_freq + channel_width
-    #     chunk.append((f_s, f_e, channel_num))
-    #     while f_e + channel_spacing <= max_f:
-    #         channel_num += 1
-    #         f_s = f_s + channel_spacing
-    #         f_e = f_e + channel_spacing
-    #         chunk.append((f_s, f_e, channel_num))
-
-    #     # create channels
-    #     for channel in chunk:
-    #         start, end, num = channel
-    #         cur_conn = Lumentum.WSSConnection(
-    #             2,
-    #             num,
-    #             LUMENTUM_INSERVICE,
-    #             blocking,
-    #             in_port,
-    #             out_port,
-    #             str(start),
-    #             str(end),
-    #             "{:.2f}".format(demux_loss),
-    #             "CH" + str(num),
-    #         )
-    #         wss_connections_dwdm.append(cur_conn)
-
-    #     self.wss_add_connections(wss_connections_dwdm)
-    #     log = "Ok"
-    #     return log, wss_connections_dwdm

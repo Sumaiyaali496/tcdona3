@@ -22,7 +22,7 @@ class QFlex:
         if qf_name == "qf_1":
             self.line_port = "1/1/n1"
         elif qf_name == "qf_2":
-            self.line_port = "1/2/n1"
+            self.line_port = "1/1/n2"
         else:
             raise Exception("Invalid quadflex name")
 
@@ -139,8 +139,10 @@ class QFlex:
                 config_dict[line_port]["index"] = config_details["config"]["index"]
 
         for line_port in config_dict.keys():
+            if line_port != self.line_port:
+                continue
             # get admin state
-            response = self.get_port_admin_state(line_port)
+            response = self.get_port_admin_state()
             response_details = xmltodict.parse(response.xml)
             config_dict[line_port]["admin_state"] = response_details["nc:rpc-reply"][
                 "data"
@@ -149,7 +151,7 @@ class QFlex:
             ]
 
             # read power and frequency
-            response = self.get_power_and_frequency(line_port)
+            response = self.get_power_and_frequency()
             response_details = xmltodict.parse(response.xml)
             component_details = response_details["nc:rpc-reply"]["data"]["components"][
                 "component"
