@@ -1,6 +1,8 @@
 import mysql.connector
 import os
 import math
+import pkg_resources
+import pandas as pd
 
 FIRST_CENTRAL_FREQ = 191350.0
 CHANNEL_SPACING = 50.0
@@ -147,3 +149,13 @@ def abs_to_dbm(absolute_value):
     """
     dbm_value = 10 * math.log10(absolute_value / 1e-3)
     return dbm_value
+
+
+def load_csv_with_pandas(filename):
+    # Get the path to the CSV file within the installed package
+    csv_path = pkg_resources.resource_filename("tcdona3", filename)
+
+    # Load the CSV file with pandas
+    df = pd.read_csv(csv_path)
+
+    return df

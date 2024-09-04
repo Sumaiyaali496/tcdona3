@@ -71,7 +71,7 @@ class TFlex:
         time.sleep(sleep_counter)
         counter = 0
         while offline:
-            response = self.get_operational_state(self.line_port)
+            response = self.get_operational_state()
             response_details = xmltodict.parse(response.xml)
             status = response_details["rpc-reply"]["data"]["components"]["component"][
                 "state"
@@ -85,11 +85,11 @@ class TFlex:
                 raise SystemError("Teraflex is offline")
 
         while not stable:
-            pm_data = self.get_params(line_port=self.line_port)
+            pm_data = self.get_params()
             if pm_data["QualityTF_indefinite_q-factor"]:
                 Q_factor = float(pm_data["QualityTF_indefinite_q-factor"])
                 time.sleep(5)
-                pm_data_verification = self.get_params(line_port=self.line_port)
+                pm_data_verification = self.get_params()
                 stable = (
                     abs(
                         Q_factor
@@ -104,7 +104,7 @@ class TFlex:
                     )
             else:
                 time.sleep(15)
-        pm_data = self.get_params(line_port=self.line_port)
+        pm_data = self.get_params()
         if DEBUG:
             print(pm_data["QualityTF_indefinite_q-factor"])
         return pm_data
@@ -152,24 +152,22 @@ class TFlex:
 
         sleep_counter = 30
         if self._config[self.line_port]["admin_state"] != "acor-stt:is":
-            self.set_interface_on(self.line_port)
+            self.set_interface_on()
         if self._config[self.line_port]["logical_interface"] != logical_interface:
             if self._config[self.line_port]["logical_interface"]:
-                self.delete_logical_interface(self.line_port)
-            self.create_logical_interface(self.line_port, logical_interface)
+                self.delete_logical_interface()
+            self.create_logical_interface(logical_interface)
             sleep_counter = 150
         if self._config[self.line_port]["modulation"] != modulation:
             self.__set_admin_maintenance(self.line_port + "/" + logical_interface)
-            self.set_interface_modulation(self.line_port, modulation)
+            self.set_interface_modulation(modulation)
             self.__remove_admin_maintenance(self.line_port + "/" + logical_interface)
             sleep_counter = 150
         # if self._config[line_port]['fec'] != fec:
         #     self.set_fec_algorithm(line_port, fec)
         # if self._config[line_port]['filter-roll-off'] != rolloff:
         #     self.set_filterrolloff(line_port, rolloff)
-        self.set_power_and_frequency(
-            line_port=self.line_port, power=target_power, frequency=central_frequency
-        )
+        self.set_power_and_frequency(power=target_power, frequency=central_frequency)
         return sleep_counter
 
     def return_current_config(self):
@@ -181,101 +179,101 @@ class TFlex:
 
         return self._config
 
-    def __get_config(self):
+    def __get_config(self):  # This should be done in a more efficient way
         response = self.get_interface()
         response_details = xmltodict.parse(response.xml)
         config = response_details["rpc-reply"]["data"]["terminal-device"][
             "logical-channels"
         ]["channel"]
+        self._config[self.line_port] = {}
+        self._config[self.line_port]["line_port"] = self.line_port
 
-        # get line_ports and logical interfaces
-        for config_details in config:
-            if "odu4" not in config_details["config"]["description"]:
-                line_port = config_details["config"]["description"].split("/ot")[0]
-                self._config[line_port] = {}
-                self._config[line_port]["line_port"] = line_port
-                self._config[line_port]["logical_interface"] = config_details["config"][
+        for channel in config:
+
+            if (channel["config"]["description"][:6] == self.line_port) and (
+                len(channel["config"]["description"].split("/")) == 4
+            ):
+                self._config[self.line_port]["logical_interface"] = channel["config"][
                     "description"
-                ].split(line_port + "/")[1]
-                self._config[line_port]["index"] = config_details["config"]["index"]
-        for line_port in self._config.keys():
-            # get admin state
-            response = self.get_port_admin_state(line_port)
-            response_details = xmltodict.parse(response.xml)
-            self._config[line_port]["admin_state"] = response_details["rpc-reply"][
-                "data"
-            ]["managed-element"]["interface"]["physical-interface"]["state"][
-                "admin-state"
-            ]
+                ].split("/")[3]
+                self._config[self.line_port]["index"] = channel["config"]["index"]
 
-            # get modulation
-            response = self.get_interface_modulation(line_port)
-            response_details = xmltodict.parse(response.xml)
-            self._config[line_port]["modulation"] = response_details["rpc-reply"][
-                "data"
-            ]["managed-element"]["interface"]["logical-interface"]["otsia"]["otsi"][
+        assert self._config[self.line_port]["logical_interface"] is not None
+
+        response = self.get_port_admin_state()
+        response_details = xmltodict.parse(response.xml)
+        self._config[self.line_port]["admin_state"] = response_details["rpc-reply"][
+            "data"
+        ]["managed-element"]["interface"]["physical-interface"]["state"]["admin-state"]
+
+        # get modulation
+        response = self.get_interface_modulation()
+        response_details = xmltodict.parse(response.xml)
+        self._config[self.line_port]["modulation"] = response_details["rpc-reply"][
+            "data"
+        ]["managed-element"]["interface"]["logical-interface"]["otsia"]["otsi"][
+            "optical-channel-configuration"
+        ][
+            "modulation"
+        ]
+
+        # get rolloff
+        response = self.get_filterrolloff()
+        response_details = xmltodict.parse(response.xml)
+        try:
+            self._config[self.line_port]["filter-roll-off"] = response_details[
+                "rpc-reply"
+            ]["data"]["managed-element"]["interface"]["logical-interface"]["otsia"][
+                "otsi"
+            ][
                 "optical-channel-configuration"
             ][
-                "modulation"
+                "filter-roll-off"
             ]
+        except:
+            self._config[self.line_port]["filter-roll-off"] = "0"
 
-            # get rolloff
-            response = self.get_filterrolloff(line_port)
-            response_details = xmltodict.parse(response.xml)
-            try:
-                self._config[line_port]["filter-roll-off"] = response_details[
-                    "rpc-reply"
-                ]["data"]["managed-element"]["interface"]["logical-interface"]["otsia"][
-                    "otsi"
-                ][
-                    "optical-channel-configuration"
-                ][
-                    "filter-roll-off"
-                ]
-            except:
-                self._config[line_port]["filter-roll-off"] = "0"
+        # read power and frequency
+        response = self.get_power_and_frequency()
+        response_details = xmltodict.parse(response.xml)
+        for component_details in response_details["rpc-reply"]["data"]["components"][
+            "component"
+        ]:
+            if "config" in component_details.keys():
+                assert component_details["config"]["name"] == "optch " + self.line_port
+                try:
+                    self._config[self.line_port]["frequency"] = component_details[
+                        "optical-channel"
+                    ]["config"]["frequency"]
+                    self._config[self.line_port][
+                        "target-output-power"
+                    ] = component_details["optical-channel"]["config"][
+                        "target-output-power"
+                    ]
+                except:
+                    self._config[self.line_port]["frequency"] = "0"
+                    self._config[self.line_port]["target-output-power"] = "0"
 
-            # read power and frequency
-            response = self.get_power_and_frequency(line_port)
-            response_details = xmltodict.parse(response.xml)
-            for component_details in response_details["rpc-reply"]["data"][
-                "components"
-            ]["component"]:
-                if "config" in component_details.keys():
-                    assert component_details["config"]["name"] == "optch " + line_port
-                    try:
-                        self._config[line_port]["frequency"] = component_details[
-                            "optical-channel"
-                        ]["config"]["frequency"]
-                        self._config[line_port][
-                            "target-output-power"
-                        ] = component_details["optical-channel"]["config"][
-                            "target-output-power"
-                        ]
-                    except:
-                        self._config[line_port]["frequency"] = "0"
-                        self._config[line_port]["target-output-power"] = "0"
+        # read fec
+        response = self.get_fec_algorithm()
+        response_details = xmltodict.parse(response.xml)
+        for component_details in response_details["rpc-reply"]["data"]["components"][
+            "component"
+        ]:
+            if "config" in component_details.keys():
+                assert component_details["config"]["name"] == "optch " + self.line_port
+                try:
+                    self._config[self.line_port]["fec"] = component_details[
+                        "optical-channel"
+                    ]["config"]["optical-channel-config"]["fec"]
+                except:
+                    self._config[self.line_port]["fec"] = "0"
 
-            # read fec
-            response = self.get_fec_algorithm(line_port)
-            response_details = xmltodict.parse(response.xml)
-            for component_details in response_details["rpc-reply"]["data"][
-                "components"
-            ]["component"]:
-                if "config" in component_details.keys():
-                    assert component_details["config"]["name"] == "optch " + line_port
-                    try:
-                        self._config[line_port]["fec"] = component_details[
-                            "optical-channel"
-                        ]["config"]["optical-channel-config"]["fec"]
-                    except:
-                        self._config[line_port]["fec"] = "0"
-
-            # get symbolrate
-            try:
-                self._config[line_port]["symbolrate"] = self.get_symbolrate(line_port)
-            except:
-                self._config[line_port]["symbolrate"] = "0"
+        # get symbolrate
+        try:
+            self._config[self.line_port]["symbolrate"] = self.get_symbolrate()
+        except:
+            self._config[self.line_port]["symbolrate"] = "0"
 
     def get_operational_state(self):
         """Method to get the operational state of the Teraflex device
@@ -370,9 +368,7 @@ class TFlex:
             response
         )
         self._config[self.line_port]["logical_interface"] = logical_interface
-        self._config[self.line_port]["modulation"] = self.get_interface_modulation(
-            self.line_port
-        )
+        self._config[self.line_port]["modulation"] = self.get_interface_modulation()
         return response
 
     def get_interface_modulation(self):
@@ -509,12 +505,12 @@ class TFlex:
     def set_interface_on(self):
         """Method to set the interface state of the Teraflex device to 'is' (in-service)"""
 
-        return self.set_interface_state(1, self.line_port)
+        return self.set_interface_state(1)
 
     def set_interface_off(self):
         """Method to set the interface state of the Teraflex device to 'oos' (out-of-service)"""
 
-        return self.set_interface_state(0, self.line_port)
+        return self.set_interface_state(0)
 
     def set_interface_state(self, state):
         """Method to set the interface state of the Teraflex device to 'is' (in-service) or 'oos' (out-of-service)

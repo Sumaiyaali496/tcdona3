@@ -5,7 +5,7 @@ from paramiko import *
 import re
 import sys
 import time
-from .utils import check_patch_owners
+from .utils import check_patch_owners, load_csv_with_pandas
 
 
 class Cassini:
@@ -50,7 +50,7 @@ class Cassini:
             raise Exception("No tai pod found")
         self.verbose = verbose
 
-        self.attr_dict = pd.read_csv("cassini_attributes.csv")
+        self.attr_dict = load_csv_with_pandas("cassini_attributes.csv")
         self.attr_list = self.attr_dict["Name"].tolist()
 
     def get_attributes(self, attr_list=None, debug=True):
