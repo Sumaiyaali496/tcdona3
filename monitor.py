@@ -6,10 +6,16 @@ import matplotlib.pyplot as plt
 import copy
 from collections import OrderedDict
 import pandas as pd
-from lumentum import *
-from polatis import Polatis
-from ila import ILA
-from osa import OSA
+from .lumentum import (
+    Lumentum,
+    LUMENTUM_DEFAULT_WSS_LOSS,
+    LUMENTUM_CHANNEL_QUANTITY,
+    LUMENTUM_WSS_CHANNEL_FREQ_CENTER_LIST,
+)
+import xmltodict
+from .polatis import Polatis
+from .ila import ILA
+from .osa import OSA
 
 # matplotlib.use('module://drawilleplot')
 # matplotlib.use('svg')
@@ -26,16 +32,6 @@ class Monitor:
         """
 
         self.device = device_object
-        if isinstance(device_object, Lumentum):
-            self = RoadmMonitor(self.device)
-        elif isinstance(device_object, Polatis):
-            self = PolatisMonitor(self.device)
-        elif isinstance(device_object, ILA):
-            self = ILAMonitor(self.device)
-        elif isinstance(device_object, OSA):
-            self = OSAMonitor(self.device)
-        else:
-            raise ValueError("Please specify a valid device object")
 
     def measurement_sweep(self):
         """Perform a measurement sweep of the device. This method should be implemented by the specific device monitoring class, and override the default method. The method should return a dictionary of the measurement data."""
@@ -87,11 +83,12 @@ class Monitor:
                 json.dump(data_output, file_output, indent=4)
 
 
-class RoadmMonitor:
+class RoadmMonitor(Monitor):
     def __init__(self, roadm_object):
+        super().__init__(roadm_object)
 
-        self.roadm = roadm_object
-        self.device_name = self.roadm.roadm_name
+        self.roadm = self.device
+        self.device_name = self.roadm.device_name
         self.device_model = "Lumentum ROADM-20 Whitebox"
         self.roadm_wss_channel_freq_center_start = 191350.0
         self.roadm_wss_channel_spacing = 50.0
