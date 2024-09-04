@@ -6,7 +6,7 @@ This is a placeholder for the Getting Started guide.
 
 From first contact to your first experiment on the Open Ireland Testbed, this guide will walk you through a 4-step process to help you get started.
 
-#. **:ref:`ssh-key`**: Generate SSH keys to access the Open Ireland Testbed.
+#. **Generate SSH Keys**: Generate SSH keys to access the Open Ireland Testbed.
 #. **Get Access to the Testbed**: Get access to the testbed from the Admin. 
 #. **Equipment Allocation**: Understand how to reserve equipment for your experiments.
 #. **Lab Rules and Safety**: Review the rules and safety guidelines for using the Open Ireland Testbed.
@@ -14,12 +14,12 @@ From first contact to your first experiment on the Open Ireland Testbed, this gu
 #. **Troubleshooting**: Find solutions to common issues you may encounter while using the Open Ireland Testbed.
 #. **First Experiment**: Run your first experiment on the Open Ireland Testbed.
 
-.. Note::
+.. note::
 You will need a computer running Linux or MAC to access the Open Ireland Testbed. Although Windows is supported, it is recommended to use Linux or MAC, since there will not be much available support for Windows. The guide below assumes you are using Linux or MAC.
 
 .. _ssh-key:
 
-Generate SSH Keys
+1. Generate SSH Keys
 ************************************************
 
 Access to Open Ireland Testbed is granted through SSH Connection. SSH keys come in pairs: a **public key** that you can share with others and a **private key** that remains on your local machine. This guide will show you how to generate and retrieve your SSH key in Linux.
