@@ -1,6 +1,6 @@
 from ncclient import manager
 import xmltodict
-from utils import check_patch_owners
+from .utils import check_patch_owners
 
 user = "fslyne"
 password = "password"

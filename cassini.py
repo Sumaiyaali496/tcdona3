@@ -5,7 +5,7 @@ from paramiko import *
 import re
 import sys
 import time
-from utils import check_patch_owners
+from .utils import check_patch_owners
 
 
 class Cassini:
