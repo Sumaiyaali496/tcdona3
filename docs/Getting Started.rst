@@ -15,7 +15,7 @@ From first contact to your first experiment on the Open Ireland Testbed, this gu
 #. **First Experiment**: Run your first experiment on the Open Ireland Testbed.
 
 .. note::
-You will need a computer running Linux or MAC to access the Open Ireland Testbed. Although Windows is supported, it is recommended to use Linux or MAC, since there will not be much available support for Windows. The guide below assumes you are using Linux or MAC.
+    You will need a computer running Linux or MAC to access the Open Ireland Testbed. Although Windows is supported, it is recommended to use Linux or MAC, since there will not be much available support for Windows. The guide below assumes you are using Linux or MAC.
 
 .. _ssh-key:
 
@@ -83,7 +83,7 @@ Note that your private key is located in the same directory as your public key (
 
 .. _get-access-testbed:
 
-Get Access to the Testbed
+2. Get Access to the Testbed
 **************************************************************
 
 Once you have generated your SSH keys (see :ref:`ssh-key`), the next step is to request access to the Open Ireland Testbed. Access is typically granted by the administrator of the testbed. You need to send the following information to the administrator:
@@ -210,11 +210,17 @@ Best Practices for SSH Configuration
 - **Use Aliases for Other Servers**: If you frequently access multiple servers, adding aliases in your SSH config (like `openireland-testbed`) can save time and effort.
 - **Update as Needed**: If the administrator provides updated connection details (e.g., a new server address), make sure to update your SSH config accordingly.
 
-Equipment Allocation
+3. Equipment Allocation
 *****************************
 
-Lab Rules and Safety
+4. Lab Rules and Safety
 *****************************
 
-Equipment Sharing and Off-hours Access
+5. Equipment Sharing and Off-hours Access
 ******************************************
+
+6. Troubleshooting
+*****************************
+
+7. First Experiment
+*****************************
