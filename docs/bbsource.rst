@@ -27,7 +27,7 @@ The Apex Broadband Source is a high performance Broadband Amplified Spontaneous 
 ``BBS`` API
 *****************************
 
-.. automodule:: bbsource
+.. automodule:: tcdona3.bbsource
    :members:
    :undoc-members:
    :show-inheritance:

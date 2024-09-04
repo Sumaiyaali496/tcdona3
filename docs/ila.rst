@@ -62,7 +62,7 @@ disconnects between two interconnected TCX1000 device Line Out ports. The ALS fe
 ``ILA`` API
 *****************************
 
-.. automodule:: ila
+.. automodule:: tcdona3.ila
    :members:
    :undoc-members:
    :show-inheritance:

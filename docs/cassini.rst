@@ -36,7 +36,7 @@ The below library provides a high level Python API to interact with the Cassini 
 
 Library to configure and monitor the Cassini Transceiver. The Cassini is accessed by the Transponder Abstraction Interface (TAI), which is hosted on a Kubernetes pod. The library uses the paramiko library to connect to the Kubernetes pod and execute the commands. The library can be used to get the performance monitoring attributes of the Cassini Transceiver, set the modulation format, set the output power, get the operational status, get the DSP operational status, get the current post-FEC BER, get the current pre-FEC BER, get the current SD FEC BER, get the current HD FEC BER, get the current input power, get the current output power, get the transmitter laser frequency, and set the transmitter laser frequency.
 
-.. automodule:: cassini
+.. automodule:: tcdona3.cassini
    :members:
    :undoc-members:
    :show-inheritance:
