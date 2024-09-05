@@ -265,28 +265,28 @@ class Lumentum(object):
         target_gain_tilt=0.0,
         optical_loo_threshold=-50.0,
     ):
-    """Configure the EDFA module in the ROADM. The method allows the user to set the EDFA module in-service or out-of-service, set the control mode (constant power or constant gain), set the gain switch mode (low-gain or high-gain), set the target gain, target power, target gain tilt, and optical LOO threshold.
+        """Configure the EDFA module in the ROADM. The method allows the user to set the EDFA module in-service or out-of-service, set the control mode (constant power or constant gain), set the gain switch mode (low-gain or high-gain), set the target gain, target power, target gain tilt, and optical LOO threshold.
 
-    IMPORTANT: This method should be used with caution as it can affect the optical power levels in the network. Do NOT use this method in quick succesion. Ideally, this method should only be used once before setting up the topology. 
+        IMPORTANT: This method should be used with caution as it can affect the optical power levels in the network. Do NOT use this method in quick succesion. Ideally, this method should only be used once before setting up the topology.
 
-    :param edfa_module: The EDFA module to be configured (either 'booster' or 'preamp')
-    :type edfa_module: str
+        :param edfa_module: The EDFA module to be configured (either 'booster' or 'preamp')
+        :type edfa_module: str
 
-    :param control_mode: The control mode to be set (either 'constant-power' or 'constant-gain')
-    :type control_mode: str
+        :param control_mode: The control mode to be set (either 'constant-power' or 'constant-gain')
+        :type control_mode: str
 
-    :param gain_switch_mode: The gain switch mode to be set (either 'low-gain' or 'high-gain'). This setting only applies if setting the EDFA module in 'constant-power' mode.
-    :type gain_switch_mode: str
+        :param gain_switch_mode: The gain switch mode to be set (either 'low-gain' or 'high-gain'). This setting only applies if setting the EDFA module in 'constant-power' mode.
+        :type gain_switch_mode: str
 
-    :param target_gain: The target gain to be set. This setting only applies if setting the EDFA module in 'constant-gain' mode. For boosters, the target gain can be set in the range of [4.0, 27.0] dB. For preamps, the target gain can be set in the range of [10.0, 30.5] dB.  
-    :type target_gain: float
+        :param target_gain: The target gain to be set. This setting only applies if setting the EDFA module in 'constant-gain' mode. For boosters, the target gain can be set in the range of [4.0, 27.0] dB. For preamps, the target gain can be set in the range of [10.0, 30.5] dB.
+        :type target_gain: float
 
-    :param target_power: The target power to be set. This setting only applies if setting the EDFA module in 'constant-power' mode. For boosters, the target power can be set in the range of [3.0, 23.0] dBm. For preamps, the target power can be set in the range of [-3.0, +22.0] dBm.
-    :type target_power: float
+        :param target_power: The target power to be set. This setting only applies if setting the EDFA module in 'constant-power' mode. For boosters, the target power can be set in the range of [3.0, 23.0] dBm. For preamps, the target power can be set in the range of [-3.0, +22.0] dBm.
+        :type target_power: float
 
-    :param target_gain_tilt: Sets the gain tilt applied over the spectrum. This is a a measure in dB of the gain slope from low to high frequency. For boosters, this can be set in the range [-3,+1] dB. The tilt cannot be set for preamps.
-    :type target_gain_tilt: float
-    """
+        :param target_gain_tilt: Sets the gain tilt applied over the spectrum. This is a a measure in dB of the gain slope from low to high frequency. For boosters, this can be set in the range [-3,+1] dB. The tilt cannot be set for preamps.
+        :type target_gain_tilt: float
+        """
         # Assert
         if edfa_module != "booster" and edfa_module != "preamp":
             raise Exception("Invalid edfa_module: Please choose 'booster' or 'preamp'.")
@@ -598,7 +598,7 @@ class Lumentum(object):
         rpc_reply = self.m.edit_config(target="running", config=command)
 
     def get_mux_target_gain(self):
-        """ Get the target gain setting for the booster EDFA module in the ROADM. This only applies if the EDFA module is set in 'constant-gain' mode.
+        """Get the target gain setting for the booster EDFA module in the ROADM. This only applies if the EDFA module is set in 'constant-gain' mode.
 
         :return: The target gain setting for the booster EDFA module in the ROADM
         :rtype: float
@@ -624,7 +624,7 @@ class Lumentum(object):
         return target_gain
 
     def get_demux_target_gain(self):
-        """ Get the target gain setting for the preamp EDFA module in the ROADM. This only applies if the EDFA module is set in 'constant-gain' mode.
+        """Get the target gain setting for the preamp EDFA module in the ROADM. This only applies if the EDFA module is set in 'constant-gain' mode.
 
         :return: The target gain setting for the preamp EDFA module in the ROADM
         :rtype: float
@@ -650,7 +650,7 @@ class Lumentum(object):
         # edfa_info_raw = xmltodict.parse(edfa_data.data_xml)['data']['edfas']['edfa']
 
     def get_mux_target_power(self):
-        """ Get the target power setting for the booster EDFA module in the ROADM. This only applies if the EDFA module is set in 'constant-power' mode.
+        """Get the target power setting for the booster EDFA module in the ROADM. This only applies if the EDFA module is set in 'constant-power' mode.
 
         :return: The target power setting for the booster EDFA module in the ROADM
         :rtype: float
@@ -675,8 +675,7 @@ class Lumentum(object):
         return target_power
 
     def get_demux_target_power(self):
-        """ Get the target power setting for the preamp EDFA module in the ROADM. This only applies if the EDFA module is set in 'constant-power' mode.
-        """
+        """Get the target power setting for the preamp EDFA module in the ROADM. This only applies if the EDFA module is set in 'constant-power' mode."""
         target_module_id = 2
         filter = (
             """<edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" 
@@ -697,7 +696,7 @@ class Lumentum(object):
         return target_power
 
     def get_mux_edfa_input_power(self):
-        """ Get the total input power for the booster EDFA module in the ROADM, recorded at the photodiode (PD) present at the Booster EDFA input. The measurement resolution is 0.01 dB.
+        """Get the total input power for the booster EDFA module in the ROADM, recorded at the photodiode (PD) present at the Booster EDFA input. The measurement resolution is 0.01 dB.
 
         :return: The total input power in dBm.
         :rtype: float
@@ -711,7 +710,7 @@ class Lumentum(object):
         return input_power
 
     def get_mux_edfa_output_power(self):
-        """ Get the total output power for the booster EDFA module in the ROADM, recorded at the photodiode (PD) present at the Booster EDFA output. The measurement resolution is 0.01 dB.
+        """Get the total output power for the booster EDFA module in the ROADM, recorded at the photodiode (PD) present at the Booster EDFA output. The measurement resolution is 0.01 dB.
 
         :return: The total output power in dBm.
         :rtype: float
@@ -725,7 +724,7 @@ class Lumentum(object):
         return output_power
 
     def get_demux_edfa_input_power(self):
-        """ Get the total input power for the preamp EDFA module in the ROADM, recorded at the photodiode (PD) present at the Preamp EDFA input. The measurement resolution is 0.01 dB.
+        """Get the total input power for the preamp EDFA module in the ROADM, recorded at the photodiode (PD) present at the Preamp EDFA input. The measurement resolution is 0.01 dB.
 
         :return: The total input power in dBm.
         :rtype: float
@@ -739,7 +738,7 @@ class Lumentum(object):
         return input_power
 
     def get_demux_edfa_output_power(self):
-        """ Get the total output power for the preamp EDFA module in the ROADM, recorded at the photodiode (PD) present at the Preamp EDFA output. The measurement resolution is 0.01 dB.
+        """Get the total output power for the preamp EDFA module in the ROADM, recorded at the photodiode (PD) present at the Preamp EDFA output. The measurement resolution is 0.01 dB.
 
         :return: The total output power in dBm.
         :rtype: float
@@ -753,7 +752,7 @@ class Lumentum(object):
         return output_power
 
     def debug_edfa(self, DEBUG=False):
-        """ This method dumps all the EDFA information for the booster and preamp EDFA modules in the ROADM in form of a dictionary, which is parsed from XML data. The method is useful for debugging purposes.
+        """This method dumps all the EDFA information for the booster and preamp EDFA modules in the ROADM in form of a dictionary, which is parsed from XML data. The method is useful for debugging purposes.
 
         :param DEBUG: Set to True to enable debugging output
         :type DEBUG: bool
