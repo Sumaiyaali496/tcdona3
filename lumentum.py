@@ -850,10 +850,6 @@ class Lumentum(object):
 
     ### WSS Operations ###
     class WSSConnection(object):
-        """
-        A class definition for a specific WSS
-        """
-
         def __init__(
             self,
             wss_id,
@@ -988,10 +984,24 @@ class Lumentum(object):
 
     def wss_get_connections(self):
         """
-        Obtain the WSS connections information
+        Get the WSS connections for the MUX and DEMUX WSS modules in the ROADM. This is a helper method that parses the XML data and returns a list of WSSConnectionStatus objects. A WSS Connection is the basic building block for the WSS module in the ROADM. It represents the connections between signals coming on a ADD port, and the multiplexed signals going out on a Line Out port. For Demux, it represents the connections between signals coming on a Line In port, and the demultiplexed signals going out on one/multiple DROP ports.
 
-        Returns:
-            A 3-level nested dictionary containing the MUX and DEMUX status info
+        The method returns a dictionary containing the following information for each connection:
+        - id: The connection ID
+        - connection-id: The connection ID
+        - start-freq: The start frequency in GHz
+        - end-freq: The end frequency in GHz
+        - attenuation: The attenuation in dB
+        - blocked: 'true' or 'false'
+        - input-port: The input port number
+        - input-power: The input power in dBm
+        - input-valid-data: 'true' or 'false'
+        - output-port: The output port number
+        - output-power: The output power in dBm
+        - output-valid-data: 'true' or 'false'
+
+        :return: A dictionary containing the WSS connections for the MUX and DEMUX WSS modules in the ROADM
+        :rtype: dict
         """
         command = """<filter>
                   <connections xmlns="http://www.lumentum.com/lumentum-ote-connection">
@@ -1298,9 +1308,21 @@ class Lumentum(object):
         return self.wss_connections
 
     def get_mux_connection_input_power(self):
+        """This method returns the input power for each connection defined in the MUX WSS module in the ROADM. The input power is measured by the OCM present at the MUX WSS input. The measurement resolution is 0.01 dB. The power measured is only for each defined channel and not the total power.
+
+        :return: A list of channel power information in the form [(id, input_power)]
+        :rtype: list
+        """
         return self.wss_get_connections_input_power("mux")
 
     def get_demux_connection_input_power(self):
+        """This method returns the input power for each connection defined in the DEMUX WSS module in the ROADM. The input power is measured by the OCM present at the DEMUX WSS input. The measurement resolution is 0.01 dB. The power measured is only for each defined channel and not the total power.
+
+        Note that this power is measured after the Preamp EDFA module in the ROADM, and before the demultiplexing operation.
+
+        :return: A list of channel power information in the form [(id, input_power)]
+        :rtype: list
+        """
         return self.wss_get_connections_input_power("demux")
 
     def get_mux_connection_output_power(self):
