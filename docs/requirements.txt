@@ -10,3 +10,4 @@ paramiko
 numpy
 matplotlib
 prettytable
+pyserial
