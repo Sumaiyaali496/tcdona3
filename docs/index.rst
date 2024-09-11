@@ -17,6 +17,7 @@ Contents
    Home <self>
    Getting Started
    polatis
+   dicon
    cassini
    teraflex
    quadflex

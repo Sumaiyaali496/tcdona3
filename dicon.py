@@ -4,7 +4,7 @@ import pyserial as serial
 class Dicon:
     def __init__(self, port, baudrate=115200, timeout=1):
         """
-        Initialize the connection to the SX Matrix Switch.
+        Initialize the connection to the DiCon Matrix Switch.
         
         :param port: The COM port the switch is connected to (e.g., 'COM3' or '/dev/ttyUSB0').
         :param baudrate: Communication speed, default is 115200.
