@@ -99,7 +99,7 @@ Using the SSH Configuration to Access the Testbed
 After you have been granted access to the Open Ireland Testbed, the administrator will send you the necessary SSH configuration details via email. These details are meant to simplify the process of connecting to the testbed by configuring your SSH settings. In this section, you'll learn how to manually add the provided SSH configuration to your Linux system and access the testbed.
 
 Step-by-Step Guide to Adding SSH Config
----------------------------------------
+-----------------------------------------
 
 1. **Check the SSH Configuration Details in Your Email:**
 
@@ -167,7 +167,7 @@ Step-by-Step Guide to Adding SSH Config
    This ensures that only your user account can read and modify these files.
 
 Accessing the Testbed with SSH
-------------------------------
+--------------------------------
 
 Once the configuration is in place, connecting to the Open Ireland Testbed is straightforward. You can use the following command to connect:
 
@@ -182,7 +182,7 @@ This command uses the alias (`openireland-testbed`) you configured in the SSH co
 This eliminates the need to type out the full connection details every time you want to connect.
 
 Testing Your Connection
-------------------------
+--------------------------
 
 After setting up your SSH config, you should test the connection to ensure everything is working:
 
@@ -203,7 +203,7 @@ After setting up your SSH config, you should test the connection to ensure every
    If issues persist, double-check the information in the email sent by the administrator and contact them if necessary.
 
 Best Practices for SSH Configuration
-------------------------------------
+--------------------------------------
 
 - **Backup Your Configurations**: Keep a backup of your SSH keys and the config file, especially if you are working from multiple machines.
 - **Use Aliases for Other Servers**: If you frequently access multiple servers, adding aliases in your SSH config (like `openireland-testbed`) can save time and effort.
@@ -218,14 +218,14 @@ Best Practices for SSH Configuration
 In order to perform experiments on the Open Ireland Testbed, users must first reserve the necessary equipment. This ensures that multiple experiments do not interfere with each other and allows for the smooth operation of the testbed. Users are required to request specific equipment and time slots in advance. This section explains how to reserve equipment, what information to provide, how to plan experiments in advance (especially around important deadlines), and how access is granted by the admin.
 
 Why Equipment Allocation is Important
--------------------------------------
+---------------------------------------
 
 The equipment on the Open Ireland Testbed is shared among multiple users and institutions. To avoid conflicts and ensure efficient usage, the testbed employs an allocation system. **Users cannot access any equipment unless it has been specifically allocated to them.** This prevents multiple experiments from using the same instruments at the same time, which could lead to unreliable results or damage to the equipment.
 
 Careful planning and proper equipment allocation are essential for smooth operation, and particularly important during high-demand periods such as leading up to conference submission deadlines or major research project milestones.
 
 Planning Experiments Ahead of Time
-----------------------------------
+------------------------------------
 
 When planning experiments, it is important to think ahead, especially if your research results need to meet a specific deadline, such as:
 - **Conference Submission Deadlines**
@@ -258,7 +258,7 @@ Experiments often take longer than expected due to equipment availability, troub
    If your experiment involves several stages over an extended period, consider booking only the necessary time slots, freeing up the equipment between stages if it is not being used.
 
 Requesting Equipment Allocation
--------------------------------
+---------------------------------
 
 To request equipment for your experiments, follow these steps:
 
@@ -291,7 +291,7 @@ To request equipment for your experiments, follow these steps:
    You will not be able to use any equipment that has not been specifically allocated to you, or if it is currently allocated to another user. This prevents conflicts and ensures that experiments do not overlap or interfere with each other.
 
 Best Practices for Equipment Allocation
----------------------------------------
+-----------------------------------------
 
 To ensure the smooth operation of the testbed and maximize your chances of getting the equipment you need, follow these best practices:
 
@@ -302,7 +302,7 @@ To ensure the smooth operation of the testbed and maximize your chances of getti
 - **Cancel Unused Reservations**: If your experiment is delayed or canceled, inform the admin as soon as possible so they can free up the equipment for other users.
 
 Troubleshooting and Common Issues
----------------------------------
+-----------------------------------
 
 Sometimes, issues may arise during the equipment reservation process. Here are a few common problems and how to resolve them:
 
