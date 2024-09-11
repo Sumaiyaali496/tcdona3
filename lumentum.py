@@ -42,7 +42,10 @@ ip_map = {
 
 class Lumentum(object):
     """
-    The Lumentum object class
+    A class used to interact with Lumentum ROADMs. The class provides methods to configure EDFA, WSS, and flex-grid connections. It also checks if the user is authorized to use the device. If the user is not authorized, it raises an Exception and does not connect to the device.
+
+    :param roadm_name: The name of the roadm (e.g. roadm_1, roadm_2, etc.)
+    :type roadm_name: str
     """
 
     def __init__(self, roadm_name, DEBUG=False):
@@ -75,7 +78,10 @@ class Lumentum(object):
 
     def disable_als(self, duration=10):
         """
-        Disable automatic laser shutdown (ALS)
+        Automatic Laser Shutdown (ALS) is a safety feature that automatically shuts down the laser if there is no light detected at the Preamp. This method can be used to disable Automatic Laser Shutdown for a specified duration. Do NOT set this to higher than 1000s.
+
+        :param duration: The duration for which ALS should be disabled
+        :type duration: int
         """
         module_id = 1
 
@@ -105,10 +111,10 @@ class Lumentum(object):
     ### EDFA Operations ###
     def edfa_get_info(self):
         """
-        Retrieve booster and preamp EDFA information
+        Get the state information of the EDFA modules (booster and preamp), such as target gain/power setting, gain tilt, control mode (such as constant power or constant gain) in the ROADM.
 
-        Returns:
-            self.edfa_info: {'booster': {}, 'preamp': {}}
+        :return: A dictionary containing the state information of the EDFA modules (booster and preamp)
+        :rtype: dict
         """
         command = """<filter><edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" 
                   xmlns:lotee="http://www.lumentum.com/lumentum-ote-edfa"></edfas></filter>"""
@@ -188,7 +194,7 @@ class Lumentum(object):
             print(e)
             exit(0)
 
-    def edfa_los_mode(self, edfa_module, los_shutdown):
+    def __edfa_los_mode(self, edfa_module, los_shutdown):
 
         if los_shutdown not in ["true", "false"]:
             raise ValueError("los_shutdown must be either 'true' or 'false'")
@@ -259,6 +265,28 @@ class Lumentum(object):
         target_gain_tilt=0.0,
         optical_loo_threshold=-50.0,
     ):
+        """Configure the EDFA module in the ROADM. The method allows the user to set the EDFA module in-service or out-of-service, set the control mode (constant power or constant gain), set the gain switch mode (low-gain or high-gain), set the target gain, target power, target gain tilt, and optical LOO threshold.
+
+        IMPORTANT: This method should be used with caution as it can affect the optical power levels in the network. Do NOT use this method in quick succesion. Ideally, this method should only be used once before setting up the topology.
+
+        :param edfa_module: The EDFA module to be configured (either 'booster' or 'preamp')
+        :type edfa_module: str
+
+        :param control_mode: The control mode to be set (either 'constant-power' or 'constant-gain')
+        :type control_mode: str
+
+        :param gain_switch_mode: The gain switch mode to be set (either 'low-gain' or 'high-gain'). This setting only applies if setting the EDFA module in 'constant-power' mode.
+        :type gain_switch_mode: str
+
+        :param target_gain: The target gain to be set. This setting only applies if setting the EDFA module in 'constant-gain' mode. For boosters, the target gain can be set in the range of [4.0, 27.0] dB. For preamps, the target gain can be set in the range of [10.0, 30.5] dB.
+        :type target_gain: float
+
+        :param target_power: The target power to be set. This setting only applies if setting the EDFA module in 'constant-power' mode. For boosters, the target power can be set in the range of [3.0, 23.0] dBm. For preamps, the target power can be set in the range of [-3.0, +22.0] dBm.
+        :type target_power: float
+
+        :param target_gain_tilt: Sets the gain tilt applied over the spectrum. This is a a measure in dB of the gain slope from low to high frequency. For boosters, this can be set in the range [-3,+1] dB. The tilt cannot be set for preamps.
+        :type target_gain_tilt: float
+        """
         # Assert
         if edfa_module != "booster" and edfa_module != "preamp":
             raise Exception("Invalid edfa_module: Please choose 'booster' or 'preamp'.")
@@ -385,7 +413,7 @@ class Lumentum(object):
             print(e)
             exit(1)
 
-    def set_mux_offline(self):
+    def __set_mux_offline(self):
         target_module_id = 1
         command = """<xc:config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0">
             <edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" xmlns:lotee="http://www.lumentum.com/lumentum-ote-edfa">
@@ -396,7 +424,7 @@ class Lumentum(object):
         )
         rpc_reply = self.m.edit_config(target="running", config=command)
 
-    def set_mux_online(self):
+    def __set_mux_online(self):
         target_module_id = 1
         command = """<xc:config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0">
             <edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" xmlns:lotee="http://www.lumentum.com/lumentum-ote-edfa">
@@ -407,7 +435,7 @@ class Lumentum(object):
         )
         rpc_reply = self.m.edit_config(target="running", config=command)
 
-    def set_demux_offline(self):
+    def __set_demux_offline(self):
         target_module_id = 2
         command = """<xc:config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0">
             <edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" xmlns:lotee="http://www.lumentum.com/lumentum-ote-edfa">
@@ -418,7 +446,7 @@ class Lumentum(object):
         )
         rpc_reply = self.m.edit_config(target="running", config=command)
 
-    def set_demux_online(self):
+    def __set_demux_online(self):
         target_module_id = 2
         command = """<xc:config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0">
             <edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" xmlns:lotee="http://www.lumentum.com/lumentum-ote-edfa">
@@ -430,7 +458,7 @@ class Lumentum(object):
         rpc_reply = self.m.edit_config(target="running", config=command)
 
     def set_mux_constant_power(self, target_power, target_gain_tilt=0.0):
-        self.set_mux_offline()
+        self.__set_mux_offline()
         time.sleep(0.5)
         target_module_id = 1
         command = """<xc:config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -449,7 +477,7 @@ class Lumentum(object):
         rpc_reply = self.m.edit_config(target="running", config=command)
 
     def set_demux_constant_power(self, target_power, target_gain_tilt=0.0):
-        self.set_demux_offline()
+        self.__set_demux_offline()
         time.sleep(0.5)
         target_module_id = 2
         command = """<xc:config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -468,7 +496,7 @@ class Lumentum(object):
         rpc_reply = self.m.edit_config(target="running", config=command)
 
     def set_mux_constant_gain(self, target_gain, target_gain_tilt=0.0):
-        self.set_mux_offline()
+        self.__set_mux_offline()
         time.sleep(0.5)
         target_module_id = 1
         command = """<xc:config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -487,7 +515,7 @@ class Lumentum(object):
         rpc_reply = self.m.edit_config(target="running", config=command)
 
     def set_demux_constant_gain(self, target_gain, target_gain_tilt=0.0):
-        self.set_mux_offline()
+        self.__set_mux_offline()
         time.sleep(0.5)
         target_module_id = 2
         command = """<xc:config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -506,7 +534,7 @@ class Lumentum(object):
         rpc_reply = self.m.edit_config(target="running", config=command)
 
     def set_mux_low_gain_mode(self):
-        self.set_mux_offline()
+        self.__set_mux_offline()
         time.sleep(0.5)
         target_module_id = 1
         command = """<xc:config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -522,7 +550,7 @@ class Lumentum(object):
         rpc_reply = self.m.edit_config(target="running", config=command)
 
     def set_mux_high_gain_mode(self):
-        self.set_mux_offline()
+        self.__set_mux_offline()
         time.sleep(0.5)
         target_module_id = 1
         command = """<xc:config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -538,7 +566,7 @@ class Lumentum(object):
         rpc_reply = self.m.edit_config(target="running", config=command)
 
     def set_demux_low_gain_mode(self):
-        self.set_mux_offline()
+        self.__set_mux_offline()
         time.sleep(0.5)
         target_module_id = 2
         command = """<xc:config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -554,7 +582,7 @@ class Lumentum(object):
         rpc_reply = self.m.edit_config(target="running", config=command)
 
     def set_demux_high_gain_mode(self):
-        self.set_mux_offline()
+        self.__set_mux_offline()
         time.sleep(0.5)
         target_module_id = 2
         command = """<xc:config xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -570,6 +598,12 @@ class Lumentum(object):
         rpc_reply = self.m.edit_config(target="running", config=command)
 
     def get_mux_target_gain(self):
+        """Get the target gain setting for the booster EDFA module in the ROADM. This only applies if the EDFA module is set in 'constant-gain' mode.
+
+        :return: The target gain setting for the booster EDFA module in the ROADM
+        :rtype: float
+        """
+
         target_module_id = 1
         filter = (
             """<edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" 
@@ -590,6 +624,11 @@ class Lumentum(object):
         return target_gain
 
     def get_demux_target_gain(self):
+        """Get the target gain setting for the preamp EDFA module in the ROADM. This only applies if the EDFA module is set in 'constant-gain' mode.
+
+        :return: The target gain setting for the preamp EDFA module in the ROADM
+        :rtype: float
+        """
         target_module_id = 2
         filter = (
             """<edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" 
@@ -611,6 +650,11 @@ class Lumentum(object):
         # edfa_info_raw = xmltodict.parse(edfa_data.data_xml)['data']['edfas']['edfa']
 
     def get_mux_target_power(self):
+        """Get the target power setting for the booster EDFA module in the ROADM. This only applies if the EDFA module is set in 'constant-power' mode.
+
+        :return: The target power setting for the booster EDFA module in the ROADM
+        :rtype: float
+        """
         target_module_id = 1
         filter = (
             """<edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" 
@@ -631,6 +675,7 @@ class Lumentum(object):
         return target_power
 
     def get_demux_target_power(self):
+        """Get the target power setting for the preamp EDFA module in the ROADM. This only applies if the EDFA module is set in 'constant-power' mode."""
         target_module_id = 2
         filter = (
             """<edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" 
@@ -651,6 +696,11 @@ class Lumentum(object):
         return target_power
 
     def get_mux_edfa_input_power(self):
+        """Get the total input power for the booster EDFA module in the ROADM, recorded at the photodiode (PD) present at the Booster EDFA input. The measurement resolution is 0.01 dB.
+
+        :return: The total input power in dBm.
+        :rtype: float
+        """
         target_module_id = 1
         filter = """<filter><edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" 
                   xmlns:lotee="http://www.lumentum.com/lumentum-ote-edfa"></edfas></filter>"""
@@ -660,6 +710,11 @@ class Lumentum(object):
         return input_power
 
     def get_mux_edfa_output_power(self):
+        """Get the total output power for the booster EDFA module in the ROADM, recorded at the photodiode (PD) present at the Booster EDFA output. The measurement resolution is 0.01 dB.
+
+        :return: The total output power in dBm.
+        :rtype: float
+        """
         target_module_id = 1
         filter = """<filter><edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" 
                   xmlns:lotee="http://www.lumentum.com/lumentum-ote-edfa"></edfas></filter>"""
@@ -669,6 +724,11 @@ class Lumentum(object):
         return output_power
 
     def get_demux_edfa_input_power(self):
+        """Get the total input power for the preamp EDFA module in the ROADM, recorded at the photodiode (PD) present at the Preamp EDFA input. The measurement resolution is 0.01 dB.
+
+        :return: The total input power in dBm.
+        :rtype: float
+        """
         target_module_id = 2
         filter = """<filter><edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" 
                   xmlns:lotee="http://www.lumentum.com/lumentum-ote-edfa"></edfas></filter>"""
@@ -678,6 +738,11 @@ class Lumentum(object):
         return input_power
 
     def get_demux_edfa_output_power(self):
+        """Get the total output power for the preamp EDFA module in the ROADM, recorded at the photodiode (PD) present at the Preamp EDFA output. The measurement resolution is 0.01 dB.
+
+        :return: The total output power in dBm.
+        :rtype: float
+        """
         target_module_id = 2
         filter = """<filter><edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" 
                   xmlns:lotee="http://www.lumentum.com/lumentum-ote-edfa"></edfas></filter>"""
@@ -687,6 +752,14 @@ class Lumentum(object):
         return output_power
 
     def debug_edfa(self, DEBUG=False):
+        """This method dumps all the EDFA information for the booster and preamp EDFA modules in the ROADM in form of a dictionary, which is parsed from XML data. The method is useful for debugging purposes.
+
+        :param DEBUG: Set to True to enable debugging output
+        :type DEBUG: bool
+
+        :return: A dictionary containing the EDFA information for the booster and preamp EDFA modules in the ROADM
+        :rtype: dict
+        """
         target_module_id = 2
         filter = """<filter><edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" 
                   xmlns:lotee="http://www.lumentum.com/lumentum-ote-edfa"></edfas></filter>"""
@@ -696,19 +769,24 @@ class Lumentum(object):
             print(edfa_info_raw)
         return edfa_info_raw
 
-    def reset_ports_info(self):
+    def __reset_ports_info(self):
         self.port_info = {}
 
     def get_ports_info(self):
         """
-        Retrieve ports information
+        Get the optical line port information for the ROADM. The method returns a dictionary containing the following information for each port:
+        - entity-description: The description of the port
+        - operational-state: The operational state of the port
+        - input-power: The input power in dBm
+        - output-power: The output power in dBm
+        - outvoa-actual-attenuation: The actual attenuation in dB
 
-        Returns:
-            self.port_info: {'port_id': {}}
+        :return: A dictionary containing the optical line port information for the ROADM
+        :rtype:  dict
         """
         command = """<filter><physical-ports xmlns="http://www.lumentum.com/lumentum-ote-port" 
                   xmlns:lotep="http://www.lumentum.com/lumentum-ote-port"></physical-ports></filter>"""
-        self.reset_ports_info()  # clear previous cache
+        self.__reset_ports_info()  # clear previous cache
 
         try:
             rpc_reply = self.m.get(command)
@@ -772,10 +850,6 @@ class Lumentum(object):
 
     ### WSS Operations ###
     class WSSConnection(object):
-        """
-        A class definition for a specific WSS
-        """
-
         def __init__(
             self,
             wss_id,
@@ -910,10 +984,24 @@ class Lumentum(object):
 
     def wss_get_connections(self):
         """
-        Obtain the WSS connections information
+        Get the WSS connections for the MUX and DEMUX WSS modules in the ROADM. This is a helper method that parses the XML data and returns a list of WSSConnectionStatus objects. A WSS Connection is the basic building block for the WSS module in the ROADM. It represents the connections between signals coming on a ADD port, and the multiplexed signals going out on a Line Out port. For Demux, it represents the connections between signals coming on a Line In port, and the demultiplexed signals going out on one/multiple DROP ports.
 
-        Returns:
-            A 3-level nested dictionary containing the MUX and DEMUX status info
+        The method returns a dictionary containing the following information for each connection:
+        - id: The connection ID
+        - connection-id: The connection ID
+        - start-freq: The start frequency in GHz
+        - end-freq: The end frequency in GHz
+        - attenuation: The attenuation in dB
+        - blocked: 'true' or 'false'
+        - input-port: The input port number
+        - input-power: The input power in dBm
+        - input-valid-data: 'true' or 'false'
+        - output-port: The output port number
+        - output-power: The output power in dBm
+        - output-valid-data: 'true' or 'false'
+
+        :return: A dictionary containing the WSS connections for the MUX and DEMUX WSS modules in the ROADM
+        :rtype: dict
         """
         command = """<filter>
                   <connections xmlns="http://www.lumentum.com/lumentum-ote-connection">
@@ -1220,9 +1308,21 @@ class Lumentum(object):
         return self.wss_connections
 
     def get_mux_connection_input_power(self):
+        """This method returns the input power for each connection defined in the MUX WSS module in the ROADM. The input power is measured by the OCM present at the MUX WSS input. The measurement resolution is 0.01 dB. The power measured is only for each defined channel and not the total power.
+
+        :return: A list of channel power information in the form [(id, input_power)]
+        :rtype: list
+        """
         return self.wss_get_connections_input_power("mux")
 
     def get_demux_connection_input_power(self):
+        """This method returns the input power for each connection defined in the DEMUX WSS module in the ROADM. The input power is measured by the OCM present at the DEMUX WSS input. The measurement resolution is 0.01 dB. The power measured is only for each defined channel and not the total power.
+
+        Note that this power is measured after the Preamp EDFA module in the ROADM, and before the demultiplexing operation.
+
+        :return: A list of channel power information in the form [(id, input_power)]
+        :rtype: list
+        """
         return self.wss_get_connections_input_power("demux")
 
     def get_mux_connection_output_power(self):

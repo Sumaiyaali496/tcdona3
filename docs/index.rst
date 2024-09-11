@@ -1,7 +1,7 @@
-Welcome to tcdona3's documentation!
+Welcome to Open Ireland Testbed Access documentation!
 =====================================
 
-**tcdona3** is a Python library for Open Ireland optical testbed in CONNECT Centre, Dublin, Ireland.
+**Trinity College Dublin Optical Network Access (TCDONA v3.0)** is a Python library for Open Ireland optical testbed in CONNECT Centre, Dublin, Ireland.
 
 .. note::
 
@@ -17,6 +17,7 @@ Contents
    Home <self>
    Getting Started
    polatis
+   dicon
    cassini
    teraflex
    quadflex
