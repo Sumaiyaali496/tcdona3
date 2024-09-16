@@ -42,6 +42,7 @@ class TFlex:
                 password="CHGME.1a",
                 timeout=60,
                 hostkey_verify=False,
+                look_for_keys=False,
             )
             self.conn.raise_mode = 0  # on RPCError, do not throw any exceptions
             self._config = {}
