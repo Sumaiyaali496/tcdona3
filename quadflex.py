@@ -115,6 +115,40 @@ class QFlex:
                 print("No BER reading available!")
         return perf_dict
 
+    def get_pre_fec_ber(self):
+
+        """
+        Method to get the pre-FEC BER of the Quadflex device. The pre-FEC BER is the BER before the Forward Error Correction is applied. The method will return 0.0 if the pre-FEC BER is not available, or there is no Rx signal.
+
+        :return: pre-FEC BER
+        :rtype: float
+        """
+
+        request_fec_ber = f"""
+        <get-pm-data xmlns="http://www.advaoptical.com/aos/netconf/aos-core-pm"
+                     xmlns:me="http://www.advaoptical.com/aos/netconf/aos-core-managed-element"
+                     xmlns:fac="http://www.advaoptical.com/aos/netconf/aos-core-facility"
+                     xmlns:adom-oduckpa="http://www.advaoptical.com/aos/netconf/aos-domain-otn-oduckpa"
+                     xmlns:otn="http://www.advaoptical.com/aos/netconf/aos-domain-otn">
+          <target-entity>/me:managed-element[me:entity-name="1"]/fac:interface[fac:name="{self._config[self.line_port]['line_port'] + '/' + self._config[self.line_port]['logical_interface']}"]/fac:logical-interface/adom-oduckpa:otu-c2pa</target-entity>
+          <pm-data>
+            <pm-current-data/>
+          </pm-data>
+        </get-pm-data>
+        """
+
+        reply_fec_ber = self.conn.dispatch(to_ele(request_fec_ber))
+        pre_fec_ber = xmltodict.parse(reply_fec_ber.xml)["nc:rpc-reply"]["pm-data"][
+            "pm-current-data"
+        ][0]["montype-monval"]["mon-val"]
+
+        try:
+            pre_fec_ber = float(pre_fec_ber)
+        except:
+            pre_fec_ber = 0.0
+
+        return pre_fec_ber
+
     @property
     def _config(self):
 
