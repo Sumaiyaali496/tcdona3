@@ -4,7 +4,7 @@ import xmltodict
 import logging
 import time
 import sys
-from utils import check_patch_owners
+from .utils import check_patch_owners
 
 
 class TFlex:
@@ -42,7 +42,9 @@ class TFlex:
                 password="CHGME.1a",
                 timeout=60,
                 hostkey_verify=False,
+
                 look_for_keys=False,  # there is a bug in ncclient, which has a temporary workaround here, but ideally should raise a pull request to fix the bug
+
             )
             self.conn.raise_mode = 0  # on RPCError, do not throw any exceptions
             self._config = {}
