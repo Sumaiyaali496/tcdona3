@@ -1,6 +1,6 @@
 from ncclient import manager
 import xmltodict
-from .utils import *
+from utils import *
 
 user = "fslyne"
 password = "password"
