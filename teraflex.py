@@ -237,38 +237,36 @@ class TFlex:
         # read power and frequency
         response = self.get_power_and_frequency()
         response_details = xmltodict.parse(response.xml)
-        for component_details in response_details["rpc-reply"]["data"]["components"][
+        component_details = response_details["rpc-reply"]["data"]["components"][
             "component"
-        ]:
-            if "config" in component_details.keys():
-                assert component_details["config"]["name"] == "optch " + self.line_port
-                try:
-                    self._config[self.line_port]["frequency"] = component_details[
-                        "optical-channel"
-                    ]["config"]["frequency"]
-                    self._config[self.line_port][
-                        "target-output-power"
-                    ] = component_details["optical-channel"]["config"][
-                        "target-output-power"
-                    ]
-                except:
-                    self._config[self.line_port]["frequency"] = "0"
-                    self._config[self.line_port]["target-output-power"] = "0"
+        ]
+        if "config" in component_details.keys():
+            assert component_details["config"]["name"] == "optch " + self.line_port
+            try:
+                self._config[self.line_port]["frequency"] = component_details[
+                    "optical-channel"
+                ]["config"]["frequency"]
+                self._config[self.line_port]["target-output-power"] = component_details[
+                    "optical-channel"
+                ]["config"]["target-output-power"]
+            except:
+                self._config[self.line_port]["frequency"] = "0"
+                self._config[self.line_port]["target-output-power"] = "0"
 
         # read fec
         response = self.get_fec_algorithm()
         response_details = xmltodict.parse(response.xml)
-        for component_details in response_details["rpc-reply"]["data"]["components"][
+        component_details = response_details["rpc-reply"]["data"]["components"][
             "component"
-        ]:
-            if "config" in component_details.keys():
-                assert component_details["config"]["name"] == "optch " + self.line_port
-                try:
-                    self._config[self.line_port]["fec"] = component_details[
-                        "optical-channel"
-                    ]["config"]["optical-channel-config"]["fec"]
-                except:
-                    self._config[self.line_port]["fec"] = "0"
+        ]
+        if "config" in component_details.keys():
+            assert component_details["config"]["name"] == "optch " + self.line_port
+            try:
+                self._config[self.line_port]["fec"] = component_details[
+                    "optical-channel"
+                ]["config"]["optical-channel-config"]["fec"]
+            except:
+                self._config[self.line_port]["fec"] = "0"
 
         # get symbolrate
         try:
