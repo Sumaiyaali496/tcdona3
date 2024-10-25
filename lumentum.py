@@ -2231,7 +2231,35 @@ class Lumentum(object):
             "CH" + connection_id,
         )
         return cur_conn
+    def def display_wss_connections(self, wss_id="mux"):
+        """
+        Display WSS connections in a tabular format just like the GUI, :param wss_id: Either 'mux' or 'demux' to specify which device to show details for.
+        """
+        if wss_id == "mux":
+             wss_connections = self.wss_get_connections()["mux"]
+        elif wss_id == "demux":
+            wss_connections = self.wss_get_connections()["demux"]
+        else:
+            raise ValueError("Invalid wss_id, choose 'mux' or 'demux'")
 
+       data = []
+       for conn_name, conn_details in wss_connections.items():
+           data.append({
+               "Connection": conn_details.get("id", "N/A"),
+               "Name": conn_details.get("connection-id", "N/A"),
+               "Start Frequency (GHz)": conn_details.get("start-freq", "N/A"),
+               "End Frequency (GHz)": conn_details.get("end-freq", "N/A"),
+               "Blocked": conn_details.get("blocked", "N/A"),
+               "Maintenance State": conn_details.get("operation", "N/A"),
+               "Attenuation (dB)": conn_details.get("attenuation", "N/A"),
+               "Connected Port": conn_details.get("input-port", "N/A"),
+               "Input Power (dBm)": conn_details.get("input-power", "N/A"),
+               "Output Power (dBm)": conn_details.get("output-power", "N/A"),
+       })
+       pp.pprint(data)    
+       
+            
+            
     def operator_flex_grid_demux_connections(
         self,
         drop_list,
@@ -2289,3 +2317,5 @@ class Lumentum(object):
             )
             wss_connections_dwdm.append(cur_conn)
         return wss_connections_dwdm
+        
+    
